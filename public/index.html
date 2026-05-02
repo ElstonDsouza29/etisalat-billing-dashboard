@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Etisalat Billing Dashboard — PJP Restaurants</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00b140;--gd:#008f33;--gl:rgba(0,177,64,.09);
+  --r:#e53935;--rl:rgba(229,57,53,.12);
+  --b:#1d6fdb;--bl:rgba(29,111,219,.09);
+  --am:#f59e0b;--aml:rgba(245,158,11,.12);
+  --pu:#7c3aed;--pul:rgba(124,58,237,.09);
+  --bg:#f3f5fa;--s:#fff;--s2:#f0f2f7;
+  --bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.14);
+  --t:#111827;--t2:#6b7280;--t3:#9ca3af;
+  --r10:10px;--r14:14px;
+  --sh:0 1px 3px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.04)
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0f1117;--s:#1a1d27;--s2:#242736;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);
+  --t:#f3f4f6;--t2:#9ca3af;--t3:#6b7280;
+  --rl:rgba(229,57,53,.15);--aml:rgba(245,158,11,.13);
+  --gl:rgba(0,177,64,.11);--bl:rgba(29,111,219,.13);--pul:rgba(124,58,237,.13)
+}}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
+.app{max-width:1320px;margin:0 auto;padding:18px 16px 80px}
+/* header */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.hl{display:flex;align-items:center;gap:11px}
+.logo{width:40px;height:40px;border-radius:10px;background:var(--g);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2}
+.htit{font-size:18px;font-weight:600;color:var(--t)}
+.hsub{font-size:11px;color:var(--t2);margin-top:1px}
+.apibadge{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;font-size:11px;font-weight:500;border:1px solid}
+.api-ok{background:var(--gl);border-color:rgba(0,177,64,.25);color:var(--g)}
+.api-err{background:var(--rl);border-color:rgba(229,57,53,.25);color:var(--r)}
+.api-ing{background:var(--aml);border-color:rgba(245,158,11,.3);color:var(--am)}
+.apibadge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* tabs */
+.tabbar{display:flex;gap:2px;border-bottom:1px solid var(--bd);margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--t2);border-bottom:2.5px solid transparent;margin-bottom:-1px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--t)}.tab.on{color:var(--g);border-bottom-color:var(--g)}
+.pane{display:none}.pane.on{display:block}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r10);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bd2);background:var(--s);color:var(--t);transition:all .15s;font-family:inherit;white-space:nowrap}
+.btn:hover:not(:disabled){background:var(--s2)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn svg{width:12px;height:12px;flex-shrink:0}
+.bg{background:var(--g)!important;color:#fff!important;border-color:var(--g)!important}.bg:hover:not(:disabled){background:var(--gd)!important}
+.bb{background:var(--b)!important;color:#fff!important;border-color:var(--b)!important}.bb:hover:not(:disabled){background:#1558b8!important}
+.bam{border-color:var(--am)!important;color:var(--am)!important;background:transparent!important}.bam:hover:not(:disabled){background:var(--aml)!important}
+.bol{border-color:var(--g)!important;color:var(--g)!important;background:transparent!important}.bol:hover:not(:disabled){background:var(--gl)!important}
+/* month bar */
+.mbar{display:flex;align-items:center;gap:10px;background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:11px 14px;margin-bottom:12px;box-shadow:var(--sh);flex-wrap:wrap}
+.mbar label{font-size:12px;font-weight:600;white-space:nowrap}
+.msel{padding:7px 10px;font-size:12px;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s2);color:var(--t);font-family:inherit;cursor:pointer}
+.mbadge{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;background:var(--bl);color:var(--b);border:1px solid rgba(29,111,219,.2)}
+.syncmsg{font-size:11px;padding:3px 9px;border-radius:var(--r10);margin-left:auto}
+.sm-ok{background:var(--gl);color:var(--g)}.sm-err{background:var(--rl);color:var(--r)}.sm-ing{background:var(--aml);color:var(--am)}
+/* summary cards */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.sc{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:11px 12px;box-shadow:var(--sh)}
+.slbl{font-size:10px;color:var(--t2);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.sval{font-size:20px;font-weight:600;line-height:1;color:var(--t)}
+.sval.r{color:var(--r)}.sval.g{color:var(--g)}.sval.b{color:var(--b)}
+/* upload */
+.dz{background:var(--s);border:2px dashed var(--bd2);border-radius:var(--r14);padding:22px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.dz:hover,.dz.drag{border-color:var(--g);background:var(--gl)}
+.dz p{font-size:12px;color:var(--t2);margin-top:4px}.dz strong{color:var(--t)}
+.pbw{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:11px 13px;margin-bottom:10px;display:none}
+.pbm{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:6px}
+.pbt{height:5px;border-radius:99px;background:var(--s2);overflow:hidden}
+.pbf{height:100%;border-radius:99px;background:var(--g);width:0;transition:width .5s ease}
+.pbst{font-size:11px;color:var(--t2);margin-top:4px;min-height:16px}
+/* mapper */
+.mpr{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:12px;margin-bottom:10px;display:none}
+.mprg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+.mff{display:flex;flex-direction:column;gap:3px}
+.mfl{font-size:10px;color:var(--t2);font-weight:500}
+.mfs{padding:6px 8px;font-size:11px;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s2);color:var(--t);font-family:inherit;width:100%}
+.matchr{background:var(--s2);border-radius:var(--r10);padding:8px 11px;font-size:11px;margin-bottom:8px;display:none;line-height:1.8}
+.chip{display:inline-flex;font-size:10px;font-weight:500;padding:1px 7px;border-radius:99px;margin:1px}
+.cg{background:var(--gl);color:var(--g);border:1px solid rgba(0,177,64,.2)}
+.ca{background:var(--aml);color:var(--am);border:1px solid rgba(245,158,11,.2)}
+/* filter bar */
+.fb{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.srch{padding:7px 10px;font-size:12px;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s);color:var(--t);font-family:inherit;flex:1;min-width:140px;max-width:220px}
+.pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--bd2);background:var(--s);color:var(--t2);transition:all .15s;white-space:nowrap}
+.pill.on{background:var(--g);color:#fff;border-color:var(--g)}
+/* table */
+.tc{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px}
+.thr{display:flex;align-items:center;justify-content:space-between;padding:10px 13px 8px;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:6px}
+.thtit{font-size:13px;font-weight:600;color:var(--t)}
+table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--bd);background:var(--s2)}
+td{padding:8px 10px;border-bottom:1px solid var(--bd);color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.sel td{background:var(--gl)}
+tr:hover:not(.sel) td{background:var(--s2)}
+input[type=checkbox]{width:13px;height:13px;accent-color:var(--g);cursor:pointer}
+.ov{color:var(--r);font-weight:600}
+.sp{display:inline-block;padding:2px 6px;border-radius:99px;font-size:10px;font-weight:500}
+.sov{background:var(--rl);color:var(--r)}.sok{background:var(--gl);color:var(--g)}.snd{background:var(--s2);color:var(--t2)}
+.pp{display:inline-block;padding:2px 6px;border-radius:99px;font-size:10px;font-weight:500}
+.ppE{background:var(--pul);color:var(--pu)}.ppP{background:var(--bl);color:var(--b)}.ppS{background:var(--gl);color:var(--g)}.ppB,.ppD{background:var(--s2);color:var(--t2)}.ppSt{background:var(--s2);color:var(--t3)}
+/* action bar */
+.ab{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;box-shadow:var(--sh)}
+/* log */
+.lc{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);box-shadow:var(--sh);overflow:hidden}
+.lh{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-bottom:1px solid var(--bd)}
+.lt{font-size:13px;font-weight:600;color:var(--t);display:flex;align-items:center;gap:5px}
+.lb{max-height:220px;overflow-y:auto}
+.le{padding:14px 13px;font-size:12px;color:var(--t2);text-align:center}
+.li{display:flex;align-items:flex-start;gap:9px;padding:8px 13px;border-bottom:1px solid var(--bd);animation:fi .3s ease}
+.li:last-child{border-bottom:none}
+@keyframes fi{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.ld{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.lds{background:var(--g)}.ldi{background:var(--am);animation:pulse 1s infinite}.ldf{background:var(--r)}
+.lm{font-size:11px;color:var(--t)}.lmt{font-size:10px;color:var(--t2);margin-top:2px}
+.ltm{font-size:10px;color:var(--t3);margin-left:auto;white-space:nowrap;padding-left:6px}
+/* doc grid */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;margin-bottom:12px}
+.dcard{background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:12px;box-shadow:var(--sh);cursor:pointer;transition:all .15s}
+.dcard:hover{border-color:var(--g)}.dcard.picked{border-color:var(--g);background:var(--gl)}
+.dicon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:7px;font-size:14px}
+.di-csv{background:#e8f5e9}.di-xl{background:#e3f2fd}.di-o{background:var(--s2)}
+.dname{font-size:12px;font-weight:500;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t)}
+.dmeta{font-size:10px;color:var(--t2)}
+.dtag{display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:500;background:var(--bl);color:var(--b);margin-top:4px}
+/* modal */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px}
+.mbg.on{display:flex}
+.modal{background:var(--s);border-radius:var(--r14);border:1px solid var(--bd2);padding:20px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mh h3{font-size:14px;font-weight:600;color:var(--t)}
+.mc{background:none;border:none;font-size:20px;cursor:pointer;color:var(--t2);line-height:1}
+.fg{margin-bottom:10px}.fgr{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.fl{font-size:11px;color:var(--t2);font-weight:500;display:block;margin-bottom:3px}.fl span{color:var(--r)}
+.fi,.fs{width:100%;padding:8px 10px;font-size:12px;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s2);color:var(--t);font-family:inherit}
+.fi:focus,.fs:focus{outline:none;border-color:var(--g)}
+.pbox{background:var(--s2);border-radius:var(--r10);border:1px solid var(--bd);padding:11px;font-size:11px;line-height:1.7;white-space:pre-wrap;max-height:180px;overflow-y:auto;color:var(--t);margin-bottom:10px}
+.rchips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.rchip{display:inline-flex;background:var(--s2);border:1px solid var(--bd);border-radius:99px;padding:2px 8px;font-size:10px;color:var(--t);margin:1px}
+.mf2{display:flex;justify-content:flex-end;gap:6px;margin-top:12px}
+.ibox{background:var(--aml);border:1px solid rgba(245,158,11,.3);border-radius:var(--r10);padding:8px 10px;font-size:11px;margin-bottom:10px;color:var(--t)}
+.sbox{background:var(--gl);border:1px solid rgba(0,177,64,.25);border-radius:var(--r10);padding:8px 10px;font-size:11px;margin-bottom:10px;color:var(--t)}
+.hint{background:var(--bl);border:1px solid rgba(29,111,219,.2);border-radius:var(--r14);padding:8px 12px;margin-bottom:11px;font-size:12px;display:flex;align-items:center;gap:7px;color:var(--t)}
+/* toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s);border:1px solid var(--bd2);border-radius:var(--r10);padding:10px 14px;font-size:12px;color:var(--t);box-shadow:var(--sh);z-index:999;display:none;animation:su .3s ease;max-width:300px}
+@keyframes su{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+input[type=file]{display:none}
+a.ol{color:var(--b);font-size:11px;font-weight:500;text-decoration:none}.a.ol:hover{text-decoration:underline}
+/* template editor */
+.tmpl-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.ttab{padding:5px 12px;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--bd2);background:var(--s);color:var(--t2);transition:all .15s}
+.ttab.on{background:var(--g);color:#fff;border-color:var(--g)}
+.var-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.vchip{padding:2px 8px;border-radius:99px;font-size:10px;font-weight:500;cursor:pointer;background:var(--s2);border:1px solid var(--bd2);color:var(--t2);transition:all .15s}
+.vchip:hover{background:var(--gl);border-color:var(--g);color:var(--g)}
+.ep-wrap{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r14);overflow:hidden}
+.ep-top{background:#00b140;padding:14px 18px}
+.ep-title{font-size:16px;font-weight:600;color:#fff}.ep-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px}
+.ep-body{padding:16px 18px}
+.ep-from{font-size:11px;color:var(--t2);margin-bottom:10px;border-bottom:1px solid var(--bd);padding-bottom:8px}
+.ep-from strong{color:var(--t)}
+.ep-subj{font-size:12px;font-weight:600;color:var(--t);margin-bottom:10px}
+.ep-content{font-size:12px;line-height:1.75;color:var(--t);white-space:pre-wrap;word-break:break-word}
+.ep-hl{background:rgba(0,177,64,.12);border-radius:3px;padding:0 2px;color:#007a2d;font-weight:500}
+.ep-foot{background:var(--s2);padding:10px 18px;font-size:10px;color:var(--t2);text-align:center;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hl">
+    <div class="logo"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+    <div>
+      <div class="htit">Etisalat Billing Dashboard</div>
+      <div class="hsub">PJP Restaurants &middot; 313 employees &middot; elston.dsouza@pjprestaurants.com</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <div class="apibadge api-ing" id="apiBadge"><div class="dot"></div><span id="apiTxt">Connecting...</span></div>
+    <button class="btn bam" id="syncBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Sync master
+    </button>
+    <button class="btn bb" id="addBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add employee
+    </button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabbar">
+  <button class="tab on" data-pane="billing">Billing alerts</button>
+  <button class="tab" data-pane="registry">Employee registry <span id="rbadge" style="background:var(--gl);color:var(--g);border-radius:99px;padding:1px 6px;font-size:10px;margin-left:2px">313</span></button>
+  <button class="tab" data-pane="upload">Upload &amp; map</button>
+  <button class="tab" data-pane="documents">Documents <span id="dbadge" style="background:var(--bl);color:var(--b);border-radius:99px;padding:1px 6px;font-size:10px;margin-left:2px">0</span></button>
+  <button class="tab" data-pane="template">Email template</button>
+</div>
+
+<!-- ══ BILLING TAB ══════════════════════════════════════════ -->
+<div id="pane-billing" class="pane on">
+  <div class="mbar">
+    <label>&#128197; Month:</label>
+    <select class="msel" id="monthSel"></select>
+    <span class="mbadge" id="mBadge">No month</span>
+    <span id="syncMsg" style="display:none" class="syncmsg"></span>
+  </div>
+  <div class="sgrid">
+    <div class="sc"><div class="slbl">Total</div><div class="sval b" id="s-tot">313</div></div>
+    <div class="sc"><div class="slbl">Over limit</div><div class="sval r" id="s-ov">0</div></div>
+    <div class="sc"><div class="slbl">Within limit</div><div class="sval g" id="s-ok">0</div></div>
+    <div class="sc"><div class="slbl">No data</div><div class="sval" id="s-nd">313</div></div>
+    <div class="sc"><div class="slbl">Selected</div><div class="sval" id="s-sel">0</div></div>
+    <div class="sc"><div class="slbl">Emails sent</div><div class="sval g" id="s-sent">0</div></div>
+  </div>
+  <div class="hint" id="hint1">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Select a month above, then go to <strong id="goUpload" style="cursor:pointer;color:var(--b)">Upload &amp; map</strong> to load billing data for that month.
+  </div>
+  <div class="fb">
+    <input class="srch" id="bsrch" placeholder="Search name, ID, account, designation..."/>
+    <button class="pill on" data-bf="all">All</button>
+    <button class="pill" data-bf="ov">Over limit</button>
+    <button class="pill" data-bf="ok">Within limit</button>
+    <button class="pill" data-bf="nd">No data</button>
+    <button class="pill" data-bf="emp">Employees</button>
+    <button class="pill" data-bf="drv">Drivers</button>
+    <button class="pill" data-bf="str">Stores</button>
+    <button class="btn bol" id="selOvBtn" style="margin-left:auto;font-size:11px">Select over-limit</button>
+  </div>
+  <div class="tc">
+    <div class="thr"><div class="thtit">Billing overview</div><span id="bvc" style="font-size:11px;color:var(--t2)"></span></div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th style="width:30px"><input type="checkbox" id="chkall"/></th>
+          <th style="width:56px">ID</th>
+          <th style="width:185px">Name (Posting Description)</th>
+          <th style="width:120px">Designation</th>
+          <th style="width:98px">Account</th>
+          <th style="width:54px">Plan</th>
+          <th style="width:68px">Limit AED</th>
+          <th style="width:68px">Bill AED</th>
+          <th style="width:68px">Diff AED</th>
+          <th style="width:78px">Status</th>
+          <th style="width:52px">Send</th>
+        </tr></thead>
+        <tbody id="btbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="ab">
+    <div style="font-size:12px;color:var(--t2)"><strong id="seln" style="color:var(--g)">0</strong> selected for alert email</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" id="prevBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview
+      </button>
+      <button class="btn bg" id="sendBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send via Outlook
+      </button>
+    </div>
+  </div>
+  <div class="lc">
+    <div class="lh">
+      <div class="lt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Outlook send log</div>
+      <button class="btn" id="clrLog" style="font-size:10px;padding:3px 8px">Clear</button>
+    </div>
+    <div class="lb" id="logb"><div class="le">No emails sent yet. All emails send from elston.dsouza@pjprestaurants.com and are saved to Sent Items.</div></div>
+  </div>
+</div>
+
+<!-- ══ REGISTRY TAB ═════════════════════════════════════════ -->
+<div id="pane-registry" class="pane">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:7px">
+    <div style="font-size:12px;color:var(--t2)"><strong id="rtot" style="color:var(--t)">313</strong> entries &mdash; master synced from <a href="https://pjprestaurants-my.sharepoint.com/personal/elston_dsouza_pjprestaurants_com/Documents/Etisalat%20master" target="_blank" style="color:var(--b)">OneDrive/Etisalat master</a></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn bam" id="syncBtn2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Sync</button>
+      <button class="btn bb" id="addBtn2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add employee</button>
+    </div>
+  </div>
+  <div class="fb">
+    <input class="srch" id="rsrch" placeholder="Search name, ID, designation, location..."/>
+    <button class="pill on" data-rf="all">All</button>
+    <button class="pill" data-rf="emp">Employees</button>
+    <button class="pill" data-rf="drv">Drivers</button>
+    <button class="pill" data-rf="str">Stores</button>
+    <button class="pill" data-rf="E">Enterprise</button>
+    <button class="pill" data-rf="P">Pro</button>
+    <button class="pill" data-rf="S">Standard</button>
+  </div>
+  <div class="tc">
+    <div class="thr"><div class="thtit">Employee master registry</div><span id="rvc" style="font-size:11px;color:var(--t2)"></span></div>
+    <div style="overflow-x:auto;max-height:500px;overflow-y:auto">
+      <table>
+        <thead><tr>
+          <th style="width:56px">Emp ID</th>
+          <th style="width:190px">Name (Posting Description)</th>
+          <th style="width:140px">Designation</th>
+          <th style="width:100px">Account no.</th>
+          <th style="width:110px">Location</th>
+          <th style="width:54px">Plan</th>
+          <th style="width:68px">Limit AED</th>
+          <th style="width:155px">Email</th>
+          <th style="width:55px">Edit</th>
+        </tr></thead>
+        <tbody id="rtbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ UPLOAD TAB ═══════════════════════════════════════════ -->
+<div id="pane-upload" class="pane">
+  <div class="mbar">
+    <label>&#128197; Uploading for:</label>
+    <select class="msel" id="upMonthSel"></select>
+    <span style="font-size:11px;color:var(--t2)">Saved to <a href="https://pjprestaurants-my.sharepoint.com/personal/elston_dsouza_pjprestaurants_com/Documents/Etisalat%20documents" target="_blank" style="color:var(--b)">OneDrive/Etisalat documents</a></span>
+  </div>
+  <div style="background:var(--gl);border:1px solid rgba(0,177,64,.2);border-radius:var(--r14);padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--t);display:flex;align-items:center;gap:8px">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--g);flex-shrink:0"><path d="M18 20a4 4 0 0 0 0-8h-.5A5.5 5.5 0 1 0 6 16.5"/><polyline points="9 15 12 12 15 15"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+    Files are automatically saved to <strong>OneDrive &rsaquo; Etisalat documents &rsaquo; [Month]</strong> and matched to employees by account number.
+  </div>
+  <div class="dz" id="dz">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--t3);margin:0 auto;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+    <p><strong>Drop billing CSV/Excel here or click to browse</strong></p>
+    <p>Matched by Account Number &mdash; saved to OneDrive automatically</p>
+  </div>
+  <input type="file" id="finput" accept=".csv,.xlsx,.xls"/>
+  <div class="pbw" id="pbw">
+    <div class="pbm"><span id="pbl">Processing...</span><span id="pbp">0%</span></div>
+    <div class="pbt"><div class="pbf" id="pbf"></div></div>
+    <div class="pbst" id="pbst"></div>
+  </div>
+  <div class="mpr" id="mpanel">
+    <div style="font-size:13px;font-weight:600;color:var(--t);margin-bottom:8px">Column mapping</div>
+    <div class="mprg">
+      <div class="mff"><div class="mfl">Account number column</div><select class="mfs" id="macct"></select></div>
+      <div class="mff"><div class="mfl">Bill amount column</div><select class="mfs" id="mbill"></select></div>
+      <div class="mff"><div class="mfl">Name column (optional)</div><select class="mfs" id="mname"></select></div>
+    </div>
+    <div class="matchr" id="matchr"></div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <button class="btn bol" id="autoDetBtn">Auto-detect</button>
+      <button class="btn bg" id="applyBtn">Apply &amp; go to billing</button>
+    </div>
+  </div>
+  <div class="tc" id="upc" style="display:none">
+    <div class="thr"><div class="thtit">File preview</div><span id="uprc" style="font-size:11px;color:var(--t2)"></span></div>
+    <div style="overflow-x:auto;max-height:220px;overflow-y:auto"><table><thead id="upth"></thead><tbody id="uptb"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══ DOCUMENTS TAB ════════════════════════════════════════ -->
+<div id="pane-documents" class="pane">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:14px;font-weight:600;color:var(--t)">Document library</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:2px">All billing files from <a href="https://pjprestaurants-my.sharepoint.com/personal/elston_dsouza_pjprestaurants_com/Documents/Etisalat%20documents" target="_blank" style="color:var(--b)">OneDrive/Etisalat documents</a></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select class="msel" id="docFilter" style="min-width:130px"><option value="">All months</option></select>
+      <button class="btn bam" id="refreshDocsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Refresh from OneDrive
+      </button>
+    </div>
+  </div>
+  <div id="docLoad" style="display:none;text-align:center;padding:24px;font-size:12px;color:var(--t2)">Loading from OneDrive...</div>
+  <div class="dgrid" id="docGrid">
+    <div style="font-size:12px;color:var(--t2);padding:18px;text-align:center;grid-column:1/-1">Click "Refresh from OneDrive" to load your uploaded billing files.</div>
+  </div>
+  <div style="background:var(--s);border:1px solid var(--bd);border-radius:var(--r14);padding:11px 14px;display:none;margin-top:4px" id="ldPanel">
+    <div style="font-size:12px;font-weight:600;color:var(--t);margin-bottom:6px">Load document into dashboard</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:9px">Selected: <strong id="ldName">-</strong> &mdash; <span id="ldMonth" style="color:var(--b)"></span></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn bg" id="ldBtn">Load &amp; map this file</button>
+      <button class="btn" id="ldCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEMPLATE TAB ═════════════════════════════════════════ -->
+<div id="pane-template" class="pane">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--t);margin-bottom:10px">Template editor</div>
+
+      <div style="font-size:11px;color:var(--t2);font-weight:500;margin-bottom:4px">Select base template</div>
+      <div class="tmpl-tabs" id="tmplTabs"></div>
+
+      <div style="font-size:11px;color:var(--t2);font-weight:500;margin-bottom:4px">Sender</div>
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r10);padding:9px 12px;margin-bottom:10px;display:flex;align-items:center;gap:9px">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--g);flex-shrink:0">ED</div>
+        <div><div style="font-size:12px;font-weight:500;color:var(--t)">Elston Shon Dsouza</div><div style="font-size:11px;color:var(--t2)">elston.dsouza@pjprestaurants.com</div></div>
+      </div>
+
+      <div style="font-size:11px;color:var(--t2);font-weight:500;margin-bottom:4px">Subject line</div>
+      <input type="text" class="fi" id="tmplSubj" style="width:100%;margin-bottom:10px"/>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:11px;color:var(--t2);font-weight:500">Body</div>
+        <div style="font-size:10px;color:var(--t2)">Click variable to insert at cursor</div>
+      </div>
+      <div class="var-chips" id="varChips"></div>
+      <textarea id="tmplBody" style="width:100%;height:200px;padding:8px 10px;font-size:11px;font-family:monospace;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s2);color:var(--t);resize:vertical;line-height:1.6" oninput="updatePreview()"></textarea>
+
+      <div style="font-size:11px;color:var(--t2);font-weight:500;margin:8px 0 4px">Signature</div>
+      <textarea id="tmplSig" style="width:100%;height:80px;padding:8px 10px;font-size:11px;font-family:monospace;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s2);color:var(--t);resize:vertical;line-height:1.6" oninput="updatePreview()"></textarea>
+
+      <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn bg" onclick="saveTemplate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save template
+        </button>
+        <span id="tmplSaved" style="font-size:11px;color:var(--g);align-self:center;display:none">&#10003; Saved</span>
+      </div>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+        <div style="font-size:13px;font-weight:600;color:var(--t)">Live preview</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)">
+          Preview as:
+          <select id="prevEmp" style="padding:4px 8px;font-size:11px;border:1px solid var(--bd2);border-radius:var(--r10);background:var(--s2);color:var(--t);font-family:inherit" onchange="updatePreview()"></select>
+        </div>
+      </div>
+      <div class="ep-wrap">
+        <div class="ep-top">
+          <div class="ep-title">Etisalat</div>
+          <div class="ep-sub">PJP Restaurants &middot; Billing Notification</div>
+        </div>
+        <div class="ep-body">
+          <div class="ep-from">From: <strong>Elston Shon Dsouza</strong> &lt;elston.dsouza@pjprestaurants.com&gt;<br>To: <strong id="epTo">-</strong></div>
+          <div class="ep-subj" id="epSubj">-</div>
+          <div class="ep-content" id="epBody">-</div>
+        </div>
+        <div class="ep-foot">Automated billing notification &middot; PJP Restaurants &middot; elston.dsouza@pjprestaurants.com</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--t2);flex-wrap:wrap">
+        <span>Subject: <strong id="subjLen" style="color:var(--t)">0</strong> chars</span>
+        <span>Body: <strong id="bodyLen" style="color:var(--t)">0</strong> chars</span>
+        <span>Read time: <strong id="readTime" style="color:var(--t)">0s</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODALS ════════════════════════════════════════════════ -->
+<div class="mbg" id="mPrev">
+  <div class="modal">
+    <div class="mh"><h3>Email preview</h3><button class="mc" data-close="mPrev">&#215;</button></div>
+    <div class="sbox">&#10003; Emails sent from <strong>elston.dsouza@pjprestaurants.com</strong> via Microsoft Graph API &mdash; saved to Sent Items.</div>
+    <p style="font-size:11px;color:var(--t2);margin-bottom:7px">Recipients:</p>
+    <div class="rchips" id="prevChips"></div>
+    <p style="font-size:10px;color:var(--t2);font-weight:600;margin-bottom:4px">SAMPLE &mdash; <span id="prevName"></span></p>
+    <div class="pbox" id="prevBody"></div>
+    <div class="mf2"><button class="btn" data-close="mPrev">Close</button><button class="btn bg" id="prevConfBtn">Confirm &amp; send</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="mConf">
+  <div class="modal">
+    <div class="mh"><h3>Confirm send</h3><button class="mc" data-close="mConf">&#215;</button></div>
+    <div class="sbox">From: <strong>elston.dsouza@pjprestaurants.com</strong> &mdash; Month: <strong id="confMonth">-</strong></div>
+    <p style="font-size:12px;color:var(--t);margin-bottom:10px">Sending <strong id="confCnt">0</strong> billing alert email(s) via Microsoft Graph API.</p>
+    <div class="fg"><label class="fl">Subject (auto-filled per employee)</label><input class="fi" id="cSubj" placeholder="Leave blank to use template"/></div>
+    <div class="fg"><label class="fl">CC (optional)</label><input class="fi" id="cCC" placeholder="manager@pjprestaurants.com"/></div>
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r10);padding:8px 11px;margin-bottom:10px;font-size:11px;color:var(--t2);display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span>&#9993; Using saved email template &mdash; variables auto-filled per employee</span>
+      <button class="btn" id="tmplPrevBtn" style="font-size:10px;padding:3px 9px">Preview</button>
+    </div>
+    <div id="tmplPrevBox" style="display:none;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r10);padding:10px 12px;margin-bottom:10px;font-size:10px;font-family:monospace;white-space:pre-wrap;max-height:120px;overflow-y:auto;color:var(--t)"></div>
+    <div class="ibox">&#9888; Each employee receives a separate personalised email. Emails are saved to Sent Items in Outlook.</div>
+    <div class="mf2">
+      <button class="btn" data-close="mConf">Cancel</button>
+      <button class="btn bg" id="doSendBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send now
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="mAdd">
+  <div class="modal">
+    <div class="mh"><h3>Add new employee</h3><button class="mc" data-close="mAdd">&#215;</button></div>
+    <div class="fgr">
+      <div class="fg"><label class="fl">Employee ID <span>*</span></label><input class="fi" id="aId"/></div>
+      <div class="fg"><label class="fl">Account number <span>*</span></label><input class="fi" id="aAcct"/></div>
+    </div>
+    <div class="fg"><label class="fl">Full name (Posting Description) <span>*</span></label><input class="fi" id="aName"/></div>
+    <div class="fg"><label class="fl">Designation <span>*</span></label><input class="fi" id="aDesig"/></div>
+    <div class="fg"><label class="fl">Email address (for billing alerts)</label><input class="fi" id="aEmail" type="email"/></div>
+    <div class="fgr">
+      <div class="fg"><label class="fl">Location</label><input class="fi" id="aLoc"/></div>
+      <div class="fg"><label class="fl">Plan</label>
+        <select class="fs" id="aPlan">
+          <option value="Basic">Basic &mdash; AED 100</option>
+          <option value="Standard" selected>Standard &mdash; AED 150</option>
+          <option value="Pro">Pro &mdash; AED 300</option>
+          <option value="Enterprise">Enterprise &mdash; AED 500</option>
+          <option value="Driver">Driver &mdash; AED 100</option>
+          <option value="Store">Store &mdash; AED 0</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Custom limit AED (blank = plan default)</label><input class="fi" id="aLim" type="number"/></div>
+    <div id="aErr" style="color:var(--r);font-size:11px;margin-bottom:7px;display:none"></div>
+    <div class="mf2"><button class="btn" data-close="mAdd">Cancel</button><button class="btn bg" id="doAddBtn">Add &amp; save to OneDrive</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="mEdit">
+  <div class="modal">
+    <div class="mh"><h3>Edit entry</h3><button class="mc" data-close="mEdit">&#215;</button></div>
+    <div class="fg"><label class="fl">Name (Posting Description)</label><input class="fi" id="eName"/></div>
+    <div class="fg"><label class="fl">Designation</label><input class="fi" id="eDesig"/></div>
+    <div class="fg"><label class="fl">Email (for billing alerts)</label><input class="fi" id="eEmail" type="email"/></div>
+    <div class="fgr">
+      <div class="fg"><label class="fl">Plan</label>
+        <select class="fs" id="ePlan">
+          <option value="Basic">Basic</option><option value="Standard">Standard</option>
+          <option value="Pro">Pro</option><option value="Enterprise">Enterprise</option>
+          <option value="Driver">Driver</option><option value="Store">Store</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Limit AED</label><input class="fi" id="eLim" type="number"/></div>
+    </div>
+    <input type="hidden" id="eId"/>
+    <div class="mf2"><button class="btn" data-close="mEdit">Cancel</button><button class="btn bg" id="doEditBtn">Save &amp; update OneDrive</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SENDER = 'elston.dsouza@pjprestaurants.com';
+var DATA   = [{"id": "10486", "name": "Tahereh Rezaei", "account": "549943849", "desig": "Supervisor", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "tahereh.rezaei@pjprestaurants.com"}, {"id": "19012", "name": "Mohammed Afzal Mohammed Habibi", "account": "549943850", "desig": "Driver & Office Assistant", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "19006", "name": "Swroop Elambilakat Raroth", "account": "549943852", "desig": "IT Application Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "swaroop.raroth@pjprestaurants.com"}, {"id": "19001", "name": "Darrell Edward Edon", "account": "549943844", "desig": "CFO", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "darrell.edon@pjprestaurants.com"}, {"id": "10542", "name": "Salaheldin Abdulrehman Mustafa", "account": "549943848", "desig": "PRO Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "salaheldin.mustafa@pjprestaurants.com"}, {"id": "19003", "name": "Soji Varghese", "account": "549943843", "desig": "Head Of IT", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "soji.varghese@pjprestaurants.com"}, {"id": "22569", "name": "Sobia Nawaz", "account": "549943854", "desig": "Accountant", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "sobia.nawaz@pjprestaurants.com"}, {"id": "19008", "name": "Vijaya Shankar Beera", "account": "549943847", "desig": "Head Of Projects", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": ""}, {"id": "50272", "name": "Nancy Dizon Romero", "account": "549945967", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "nancy.romero@pjprestaurants.com"}, {"id": "6327", "name": "Amal Chandrasekhara Pillai", "account": "549945968", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "amal.chandra@pjprestaurants.com"}, {"id": "19002", "name": "Tapan Arunkumar Vaidya", "account": "503489363", "desig": "Group Chief Executive Officer", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "tapan.vaidya@pjprestaurants.com"}, {"id": "8159", "name": "Nina Christina Chua", "account": "555185436", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "nina.chua@pjprestaurants.com"}, {"id": "3527", "name": "Moothandassery Viswanathan Ranjith", "account": "505753975", "desig": "Treasury Accountant", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "ranjith.viswanathan@pjprestaurants.com"}, {"id": "6697", "name": "Gerard Anthuvan", "account": "558015293", "desig": "IT Support Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": ""}, {"id": "78716", "name": "JAYAKUMar KALIA PERUMAL - Cancelled", "account": "549952919", "desig": "Maintenance", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "74231", "name": "RajMohamed Basheer Ahmed RajMohamed", "account": "549952921", "desig": "Maintenance Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": ""}, {"id": "77016", "name": "Nasir Ali Kapadia", "account": "549952894", "desig": "Maintenance Technician", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "78343", "name": "Sornam Sambath", "account": "549952895", "desig": "Maintenance Technician", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "20046", "name": "Maxim Pius Coutinho", "account": "549931696", "desig": "Head of Supply Chain", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "maxim.coutinho@pjprestaurants.com"}, {"id": "20070", "name": "Ahmed Mohamed Ali Mohamed Hammad", "account": "562408133", "desig": "Head Of QAHFS", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "ahmed.hammad@pjprestaurants.com"}, {"id": "20073", "name": "UMAIR YOUSAF - Cancelled", "account": "565337872", "desig": "Motorbike Delivery Driver", "location": "Lulu Mall, Fujairah", "locCode": "PJLMF", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20335", "name": "Loka Sathya Moorthy - Cancelled", "account": "565389883", "desig": "HR Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": ""}, {"id": "81240", "name": "Joanne Elisan Torres", "account": "502139831", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "joanne.torres@pjprestaurants.com"}, {"id": "80669", "name": "Michael Rogado Sitchon", "account": "502139882", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "michael.sitchon@pjprestaurants.com"}, {"id": "20136", "name": "Rolline Johansen Tuazon", "account": "565114388", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "rollin.tuazon@pjprestaurants.com"}, {"id": "20137", "name": "Karim Emam Anwar Abdrabou", "account": "565114599", "desig": "Revenue Strategies Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "karim.anwar@pjprestaurants.com"}, {"id": "20128", "name": "Ifrah Tanweer", "account": "547939404", "desig": "Will be cancelled", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "20159", "name": "Sherif Ahmed Elaassar", "account": "564002209", "desig": "Operations Manager-Home Delivery", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "sherif.ahmed@pjprestaurants.com"}, {"id": "20173", "name": "AGHA AQEEL - Cancelled", "account": "547927049", "desig": "Motorbike Delivery Driver", "location": "Mega Mall", "locCode": "PJMM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20418", "name": "Abdul Razak Kuthiny", "account": "566814099", "desig": "Maintenance", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "76440", "name": "Sajeer Madathil", "account": "565460462", "desig": "Motorbike Delivery Driver", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "78359", "name": "Jithesh Dermal", "account": "565460470", "desig": "QCC Driver", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "17533", "name": "Leonardo Inocencio Rosario Rebello", "account": "565460579", "desig": "QCC Driver", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22108", "name": "Maksud Alam", "account": "549962171", "desig": "Facilities & Maintenance", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "20417", "name": "Manan Chhaya", "account": "506299681", "desig": "QCC Manager", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Pro", "limit": 300, "email": "manan.chhaya@pjprestaurants.com"}, {"id": "20813", "name": "Dexter Ramos", "account": "507135180", "desig": "Cancelled", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "76839", "name": "Mohamed Hilmy Mohamed Nalir", "account": "509023984", "desig": "QCC Shift Manager", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Pro", "limit": 300, "email": "mohamed.hilmy@pjprestaurants.com"}, {"id": "543072490", "name": "Special EVENTS", "account": "543072490", "desig": "Special Events", "location": "Special Events", "locCode": "PJSE", "plan": "Standard", "limit": 150, "email": ""}, {"id": "21006", "name": "Renjith Ramanunni", "account": "564110667", "desig": "IT Executive", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "renjith.ramanunni@pjprestaurants.com"}, {"id": "21078", "name": "Ahmed Rashed", "account": "565457228", "desig": "Local Store Marketing Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": ""}, {"id": "549989959", "name": "Common # for IT", "account": "549989959", "desig": "Common # for IT", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "563293520", "name": "Special EVENTS", "account": "563293520", "desig": "Special EVENTS", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "563293527", "name": "Was with IT (Cancelled)", "account": "563293527", "desig": "IT", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "21176", "name": "Margarita Pennylem Caoagdan", "account": "564148961", "desig": "Supply Chain Officer", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "margarita.caoagdan@pjprestaurants.com"}, {"id": "545821448", "name": "Backup Sim for Delivery Boy  Cancelled", "account": "545821448", "desig": "Delivery Boy  Cancelled", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21286", "name": "Mary Ann Bayron", "account": "545817055", "desig": "Training Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "mary.ann@pjprestaurants.com"}, {"id": "21338", "name": "Karim Chaanine", "account": "569938984", "desig": "Chief Marketing Officer", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "karim.chaanine@pjprestaurants.com"}, {"id": "22419", "name": "Sami Rahhal", "account": "565441190", "desig": "Leasing Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "sami.jamal@pjprestaurants.com"}, {"id": "21493", "name": "Dhruv Asher", "account": "502130781", "desig": "QCC Manager", "location": "AUH QCC", "locCode": "PJADQCC", "plan": "Pro", "limit": 300, "email": "dhruv.asher@pjprestaurants.com"}, {"id": "21619", "name": "Mariza Regoso", "account": "564183295", "desig": "Accountant", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "mariza.regoso@pjprestaurants.com"}, {"id": "20463", "name": "Abdul Zubair", "account": "505601596", "desig": "QCC Driver", "location": "AUH QCC", "locCode": "PJADQCC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "22338", "name": "Faisal Muhammad - Cancelled", "account": "505117513", "desig": "Cancelled", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "78781", "name": "Jerousel Cabrera Valentino", "account": "505117810", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "jerousel.valentino@pjprestaurants.com"}, {"id": "20047", "name": "Abubakar Shekh", "account": "505117483", "desig": "Area Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "abubakar.shekh@pjprestaurants.com"}, {"id": "21765", "name": "Maryam Rashed Alboodi Alhebsi", "account": "506451872", "desig": "Cancelled", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "505962197", "name": "PJP - Watsapp for business-Marketing", "account": "505962197", "desig": "Watsapp for business-Marketing", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "501994539", "name": "Was with IT (Cancelled)", "account": "501994539", "desig": "IT", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22184", "name": "Ranbir Singh Ghuman", "account": "508306935", "desig": "Head Of Finance", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "ranbir.ghuman@pjprestaurants.com"}, {"id": "21501", "name": "Mohamed Abdelhamid", "account": "508684073", "desig": "Group COO - UAE, KSA & Jordan", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": ""}, {"id": "22191", "name": "Walid Saad Mahmoud Hassan Gawish", "account": "543071689", "desig": "Head of Operations and Training", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "walid.gawish@pjprestaurants.com"}, {"id": "22192", "name": "Blessie Ann Torno", "account": "543071660", "desig": "Corporate Sales and Consumer Insights Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "blessie.ann@pjprestaurants.com"}, {"id": "22313", "name": "Benjamin Pierre Hagen", "account": "566895280", "desig": "Brand and Digital Strategy Head", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22337", "name": "Daniel Odrada Polintan", "account": "562183811", "desig": "Leasing and Maintenance Administrator", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "daniel.polintan@pjprestaurants.com"}, {"id": "21630", "name": "Muhammad Sajid Shafiq", "account": "501132012", "desig": "Maintenance Technician", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22377", "name": "Melitsa Mizrahi", "account": "501025747", "desig": "Chief People Officer", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Enterprise", "limit": 500, "email": "melitsa.mizrahi@pjprestaurants.com"}, {"id": "22433", "name": "Rachel Watts", "account": "502189034", "desig": "Finance Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "rachel.watts@pjprestaurants.com"}, {"id": "22535", "name": "Manoj Sebastian", "account": "504418145", "desig": "Maintenance Technician", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22574", "name": "Reshma Kanakathidam", "account": "569381603", "desig": "Payroll Associate", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "reshma.kanakathidam@pjprestaurants.com"}, {"id": "22559", "name": "Sunil Jem", "account": "569381258", "desig": "QCC Driver", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "22575", "name": "Wynne Dale Sagayno", "account": "503543144", "desig": "Talent Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "wynne.sagayno@pjprestaurants.com"}, {"id": "22593", "name": "Sahid Ali Khan", "account": "545021196", "desig": "Maintenance Technician", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "544409177", "name": "MDD request - HR requested - with IT", "account": "544409177", "desig": "MDD request - HR requested - with IT", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22602", "name": "Sara Jacob", "account": "505484008", "desig": "Accountant", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "sara.jacob@pjprestaurants.com"}, {"id": "22600", "name": "Rachna Rana", "account": "505386724", "desig": "HR Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "rachna.rana@pjprestaurants.com"}, {"id": "542716318", "name": "Elrida Dsouza", "account": "542716318", "desig": "People Experience & Projects Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "elrida.dsouza@pjprestaurants.com"}, {"id": "20624", "name": "Muhammad Sajjad", "account": "545861348", "desig": "Motorbike Delivery Driver", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "83259", "name": "Amir Hussain", "account": "545861350", "desig": "Motorbike Delivery Driver", "location": "Al Karama", "locCode": "PJKAR", "plan": "Driver", "limit": 100, "email": ""}, {"id": "81704", "name": "Sudip Dutta", "account": "545861356", "desig": "Motorbike Delivery Driver", "location": "ENOC 1081 Al Warqa", "locCode": "PJENAW", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20044", "name": "Mohammed Naseem Abdul Rahim Rayeen", "account": "545861292", "desig": "Motorbike Delivery Driver", "location": "Al Ain Mall", "locCode": "PJAAM", "plan": "Driver", "limit": 100, "email": "shaikha.alshaeralnaqbi@pjprestaurants.com"}, {"id": "20539", "name": "Akhtiar Ali Laghari", "account": "545861346", "desig": "Motorbike Delivery Driver", "location": "Abu Dhabi Mall", "locCode": "PJADM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20260", "name": "Sudip Raut", "account": "564334711", "desig": "Motorbike Delivery Driver", "location": "Sahara Centre", "locCode": "PJSC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20459", "name": "Francis Mugumya", "account": "564161518", "desig": "Motorbike Delivery Driver", "location": "Matajer Al Khan", "locCode": "PJMAK", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20116", "name": "Asraful Sk", "account": "564161603", "desig": "Motorbike Delivery Driver", "location": "ENOC 1505 Al Faseel, Fujairah", "locCode": "PJENAF", "plan": "Driver", "limit": 100, "email": ""}, {"id": "82121", "name": "Ayaz Mohiyuddin Chadchan", "account": "564334713", "desig": "Motorbike Delivery Driver", "location": "ENOC 212, Ajman", "locCode": "PJEPAJ", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20056", "name": "Maqsood Ali Ansari", "account": "564161528", "desig": "Motorbike Delivery Driver", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Driver", "limit": 100, "email": "ali.alansari@pjprestaurants.com"}, {"id": "21014", "name": "MD Tanimul Islam", "account": "564161586", "desig": "Motorbike Delivery Driver", "location": "Souq Extra DSO", "locCode": "PJSED", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20676", "name": "Ali Hassan", "account": "564334712", "desig": "Motorbike Delivery Driver", "location": "Ajman Corniche", "locCode": "PJACH", "plan": "Driver", "limit": 100, "email": "dana.hassan@pjprestaurants.com"}, {"id": "20812", "name": "Hardeep Singh Lakhbir Singh", "account": "564334699", "desig": "Motorbike Delivery Driver", "location": "ENOC 98 Beirut Street", "locCode": "PJENBS", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20519", "name": "Muhammad Suleman", "account": "565013697", "desig": "Motorbike Delivery Driver", "location": "Mega Mall", "locCode": "PJMM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21212", "name": "Mahmoud Mahmoud Nasr Hassanin - Cancelled", "account": "564162600", "desig": "Motorbike Delivery Driver", "location": "Union Coop UAQ", "locCode": "PJUC", "plan": "Driver", "limit": 100, "email": "mahmoud.aburahma@pjprestaurants.com"}, {"id": "20330", "name": "Usman Arif", "account": "565086397", "desig": "Motorbike Delivery Driver", "location": "ENOC 84 Al Qusais", "locCode": "PJENAQ", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21159", "name": "Muzammal Ahmad", "account": "563984567", "desig": "Motorbike Delivery Driver", "location": "Matajer Al Khan", "locCode": "PJMAK", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20386", "name": "Bilal Hassan", "account": "566813862", "desig": "Motorbike Delivery Driver", "location": "Deerfields Mall", "locCode": "PJDFM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20203", "name": "Shaik Farook", "account": "502355794", "desig": "Motorbike Delivery Driver", "location": "Shabhat Plaza", "locCode": "PJSP", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20209", "name": "Mark John Perez", "account": "503530439", "desig": "Motorbike Delivery Driver", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Driver", "limit": 100, "email": "marketing@papajohns.ae"}, {"id": "20333", "name": "Dulue Meay", "account": "565460737", "desig": "Motorbike Delivery Driver", "location": "Deerfields Mall", "locCode": "PJDFM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20322", "name": "Ahmar Rehman", "account": "565460458", "desig": "Motorbike Delivery Driver", "location": "City Centre Masdar", "locCode": "PJMSC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20328", "name": "Mahesh Namal Chandrasiri Nabadava Vithanage", "account": "565460459", "desig": "Motorbike Delivery Driver", "location": "Al Hamra Mall", "locCode": "PJAHM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20311", "name": "Aarokiyam Nesa Kumar", "account": "565460577", "desig": "Motorbike Delivery Driver", "location": "Grand Avenue", "locCode": "PJGA", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20568", "name": "Farhan Khan", "account": "566869345", "desig": "Motorbike Delivery Driver", "location": "Makani Zakher Alain", "locCode": "PJMZA", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20366", "name": "Alex Amanya", "account": "566869343", "desig": "Motorbike Delivery Driver", "location": "Matajer Al Musalla", "locCode": "PJMMU", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21024", "name": "Dhurba Tamang", "account": "503521562", "desig": "Motorbike Delivery Driver", "location": "Al Wahda Mall", "locCode": "PJAWM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20413", "name": "Saddam Hussain", "account": "505101398", "desig": "Motorbike Delivery Driver", "location": "Al Ain Mall", "locCode": "PJAAM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20422", "name": "Husnain Ali", "account": "507802831", "desig": "Motorbike Delivery Driver", "location": "Al Ghurair Centre", "locCode": "PJAGR", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20426", "name": "Muhammad Shah Jahan", "account": "508490753", "desig": "Motorbike Delivery Driver", "location": "Al Ghurair Centre", "locCode": "PJAGR", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20433", "name": "Feroz Khan", "account": "507563784", "desig": "Motorbike Delivery Driver", "location": "Deerfields Mall", "locCode": "PJDFM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20460", "name": "Md Rashid", "account": "502393396", "desig": "Motorbike Delivery Driver", "location": "Emarat Ajman", "locCode": "PJEMAJ", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20467", "name": "Sirajudeen Munier Ghouse Mohideen Saleem", "account": "502395073", "desig": "Motorbike Delivery Driver", "location": "Matajer Al Khan", "locCode": "PJMAK", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20535", "name": "Najmuddeen Kunnath - Cancelled", "account": "503192547", "desig": "Motorbike Delivery Driver", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20537", "name": "Abdelmonem Saad Nour Abomaila", "account": "508709165", "desig": "Motorbike Delivery Driver", "location": "Dubai International City", "locCode": "PJDIC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21228", "name": "Kashif Muhammad", "account": "504503793", "desig": "Motorbike Delivery Driver", "location": "Souq Extra DSO", "locCode": "PJSED", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20634", "name": "Saqib Mehmood", "account": "504780313", "desig": "Motorbike Delivery Driver", "location": "Mazyad Mall", "locCode": "PJMZM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20679", "name": "Kiran Adhikari", "account": "501426893", "desig": "Motorbike Delivery Driver", "location": "Marina Diamond", "locCode": "PJDM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20698", "name": "Gurwant Singh", "account": "502149246", "desig": "Motorbike Delivery Driver", "location": "Lulu Mall, Fujairah", "locCode": "PJLMF", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20692", "name": "Muhammad Imran", "account": "502149365", "desig": "Motorbike Delivery Driver", "location": "City Centre Al Dhait", "locCode": "PJCCA", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20707", "name": "Edward Deocares", "account": "502149308", "desig": "Motorbike Delivery Driver", "location": "Sahara Centre", "locCode": "PJSC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20755", "name": "Mudassir Khan", "account": "504687728", "desig": "Motorbike Delivery Driver", "location": "Reem Mall", "locCode": "PJRMM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20744", "name": "Luqman Hussain", "account": "504724322", "desig": "Motorbike Delivery Driver", "location": "Matajer Al Juraina", "locCode": "PJMAJ", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21139", "name": "Injamamul Hoque", "account": "508961736", "desig": "Motorbike Delivery Driver", "location": "Union Coop UAQ", "locCode": "PJUC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21156", "name": "Prince Singh", "account": "545841254", "desig": "Motorbike Delivery Driver", "location": "Murad Mall", "locCode": "PJMUM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21199", "name": "Ramesh Penjarla", "account": "563293529", "desig": "Motorbike Delivery Driver", "location": "The One Suyoh", "locCode": "PJSYM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21163", "name": "Muhammad Umar Usman", "account": "563293525", "desig": "Motorbike Delivery Driver", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21175", "name": "Munawar Rasheed", "account": "563293526", "desig": "Motorbike Delivery Driver", "location": "ADNOC 913 Khalidiya", "locCode": "PJACKH", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21206", "name": "Rahul Bisambar", "account": "563293528", "desig": "Motorbike Delivery Driver", "location": "Manar Mall", "locCode": "PJMNM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21158", "name": "Kashif Jarral", "account": "564148982", "desig": "Motorbike Delivery Driver", "location": "Madinat Zayed", "locCode": "PJMZ", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21174", "name": "Inaam UR Rehman - Cancelled", "account": "545817052", "desig": "Motorbike Delivery Driver", "location": "Sahara Centre", "locCode": "PJSC", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21272", "name": "Abdullah Nasir", "account": "545817051", "desig": "Motorbike Delivery Driver", "location": "Shabhat Plaza", "locCode": "PJSP", "plan": "Driver", "limit": 100, "email": ""}, {"id": "22226", "name": "Muzafar Ali", "account": "545817049", "desig": "Motorbike Delivery Driver", "location": "Madinat Zayed", "locCode": "PJMZ", "plan": "Driver", "limit": 100, "email": ""}, {"id": "21314", "name": "MD Robiul Hossain Monna", "account": "543067029", "desig": "Motorbike Delivery Driver", "location": "Motor City", "locCode": "PJMCT", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20314", "name": "Muhammad Rab Nawaz", "account": "504439278", "desig": "Motorbike Delivery Driver", "location": "Icon Casa JVC", "locCode": "PJICS", "plan": "Driver", "limit": 100, "email": ""}, {"id": "22551", "name": "Noor Mohamed Mansour", "account": "568637798", "desig": "Motorbike Delivery Driver", "location": "Damac Hills Mall", "locCode": "PJVNM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "22544", "name": "Muhammad Shaban Chishti", "account": "504418473", "desig": "Motorbike Delivery Driver", "location": "ENOC 95 Nad Al Hamar", "locCode": "PJENNH", "plan": "Driver", "limit": 100, "email": ""}, {"id": "22588", "name": "Raja Ehtisham Haider", "account": "569382183", "desig": "Motorbike Delivery Driver", "location": "ENOC 89 Al Khawaneej", "locCode": "PJENAK", "plan": "Driver", "limit": 100, "email": ""}, {"id": "81508", "name": "Arvind Kumar - Cancelled", "account": "565265203", "desig": "Motorbike Delivery Driver", "location": "RAK Mall", "locCode": "PJRAKM", "plan": "Driver", "limit": 100, "email": ""}, {"id": "20332", "name": "Shahidul Islam - Cancelled", "account": "565460736", "desig": "Motorbike Delivery Driver", "location": "Shakhbout City", "locCode": "PJSHK", "plan": "Driver", "limit": 100, "email": ""}, {"id": "600520001", "name": "Call Center Toll free number", "account": "600520001", "desig": "Call Center Toll free number", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": ""}, {"id": "445355943", "name": "PJP - Al Karama", "account": "445355943", "desig": "Store", "location": "Al Karama", "locCode": "PJKAR", "plan": "Store", "limit": 0, "email": "pj.karama@pjprestaurants.com"}, {"id": "445355959", "name": "PJP - Wafi Mall", "account": "445355959", "desig": "Store", "location": "Wafi Mall", "locCode": "PJWM", "plan": "Store", "limit": 0, "email": "pj.wafi@pjprestaurants.com"}, {"id": "445355958", "name": "PJP - Burjuman Centre", "account": "445355958", "desig": "Store", "location": "Burjuman Centre", "locCode": "PJBJC", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "445355917", "name": "PJP - Eleganza Plaza", "account": "445355917", "desig": "Store", "location": "Eleganza Plaza", "locCode": "PJELG", "plan": "Store", "limit": 0, "email": "pj.eleganza@pjprestaurants.com"}, {"id": "445355931", "name": "PJP - Al Ghurair Centre", "account": "445355931", "desig": "Store", "location": "Al Ghurair Centre", "locCode": "PJAGR", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "445355944", "name": "PJP - ENOC 1005 Garhoud", "account": "445355944", "desig": "Store", "location": "ENOC 1005 Garhoud", "locCode": "PJENGH", "plan": "Store", "limit": 0, "email": "pj.garhoud@pjprestaurants.com"}, {"id": "464995910", "name": "PJP - Emarat Ajman", "account": "464995910", "desig": "Store", "location": "Emarat Ajman", "locCode": "PJEMAJ", "plan": "Store", "limit": 0, "email": "pj.ajman@pjprestaurants.com"}, {"id": "464995812", "name": "PJP - Sahara Centre", "account": "464995812", "desig": "Store", "location": "Sahara Centre", "locCode": "PJSC", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "464995909", "name": "PJP - ENOC 212, Ajman", "account": "464995909", "desig": "Store", "location": "ENOC 212, Ajman", "locCode": "PJEPAJ", "plan": "Store", "limit": 0, "email": "pj.ach@pjprestaurants.com"}, {"id": "464995814", "name": "PJP - Rumailah Ajman", "account": "464995814", "desig": "Store", "location": "Rumailah Ajman", "locCode": "PJRUAJ", "plan": "Store", "limit": 0, "email": "pj.ach@pjprestaurants.com"}, {"id": "435604063", "name": "PJP - Bawadi Mall - Cancelled", "account": "435604063", "desig": "Store", "location": "Bawadi Mall", "locCode": "PJBWM", "plan": "Store", "limit": 0, "email": ""}, {"id": "445355965", "name": "PJP - ENOC 1001 Al Twar", "account": "445355965", "desig": "Store", "location": "ENOC 1001 Al Twar", "locCode": "PJENAT", "plan": "Store", "limit": 0, "email": "pj.altawar@pjprestaurants.com"}, {"id": "445355968", "name": "PJP - ENOC 84 Al Qusais", "account": "445355968", "desig": "Store", "location": "ENOC 84 Al Qusais", "locCode": "PJENAQ", "plan": "Store", "limit": 0, "email": "pj.alquasis@pjprestaurants.com"}, {"id": "427298836", "name": "PJP - Deerfields Mall", "account": "427298836", "desig": "Store", "location": "Deerfields Mall", "locCode": "PJDFM", "plan": "Store", "limit": 0, "email": "pj.derfield@pjprestaurants.com"}, {"id": "427298838", "name": "PJP - Al Wahda Mall", "account": "427298838", "desig": "Store", "location": "Al Wahda Mall", "locCode": "PJAWM", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "435604102", "name": "PJP - Bawadi Mall", "account": "435604102", "desig": "Store", "location": "Bawadi Mall", "locCode": "PJBWM", "plan": "Store", "limit": 0, "email": "pj.bawadi@pjprestaurants.com"}, {"id": "464995924", "name": "PJP - Mega Mall", "account": "464995924", "desig": "Store", "location": "Mega Mall", "locCode": "PJMM", "plan": "Store", "limit": 0, "email": "pj.megamall@pjprestaurants.com"}, {"id": "427298837", "name": "PJP - Khalidiya Mall", "account": "427298837", "desig": "Store", "location": "Khalidiya Mall FC", "locCode": "PJKMFC", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "435604203", "name": "PJP - Shabhat Plaza", "account": "435604203", "desig": "Store", "location": "Shabhat Plaza", "locCode": "PJSP", "plan": "Store", "limit": 0, "email": "pj.shabat@pjprestaurants.com"}, {"id": "445356078", "name": "PJP - Dubai Festival City", "account": "445356078", "desig": "Store", "location": "Dubai Festival City", "locCode": "PJDFC", "plan": "Store", "limit": 0, "email": "pj.dfc@pjprestaurants.com"}, {"id": "445356063", "name": "PJP - ENOC 1081 Al Warqa", "account": "445356063", "desig": "Store", "location": "ENOC 1081 Al Warqa", "locCode": "PJENAW", "plan": "Store", "limit": 0, "email": "pj.mirdiff@pjprestaurants.com"}, {"id": "445355953", "name": "PJP - Mirdif City Centre", "account": "445355953", "desig": "Store", "location": "Mirdif City Centre North", "locCode": "PJMCN", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "445355955", "name": "PJP - Al Barsha Mall", "account": "445355955", "desig": "Store", "location": "Al Barsha Mall", "locCode": "PJABM", "plan": "Store", "limit": 0, "email": "pj.barsha@pjprestaurants.com"}, {"id": "445355998", "name": "PJP - QCC Dubai", "account": "445355998", "desig": "Store", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Store", "limit": 0, "email": "pj.dfc@pjprestaurants.com"}, {"id": "427298879", "name": "PJP - Dalma Mall", "account": "427298879", "desig": "Store", "location": "Dalma Mall", "locCode": "PJDLM", "plan": "Store", "limit": 0, "email": "pj.dalma@pjprestaurants.com"}, {"id": "427298839", "name": "PJP - Madinat Zayed", "account": "427298839", "desig": "Store", "location": "Madinat Zayed", "locCode": "PJMZ", "plan": "Store", "limit": 0, "email": "pj.madinatzayed@pjprestaurants.com"}, {"id": "427298881", "name": "PJP - Mazyad Mall", "account": "427298881", "desig": "Store", "location": "Mazyad Mall", "locCode": "PJMZM", "plan": "Store", "limit": 0, "email": "PJ.mazyad@pjprestaurants.com"}, {"id": "435604204", "name": "PJP - Wahat Hili Mall", "account": "435604204", "desig": "Store", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Store", "limit": 0, "email": "pj.wahthili@pjprestaurants.com"}, {"id": "445356080", "name": "PJP - Mamzar Centre", "account": "445356080", "desig": "Store", "location": "Mamzar Centre", "locCode": "PJMC", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "435604222", "name": "PJP - Al Ain Mall", "account": "435604222", "desig": "Store", "location": "Al Ain Mall", "locCode": "PJAAM", "plan": "Store", "limit": 0, "email": "pj.alainmall@pjprestaurants.com"}, {"id": "445356052", "name": "PJP - ENOC 15 Rashidiya", "account": "445356052", "desig": "Store", "location": "ENOC 15 Rashidiya", "locCode": "PJENRAS", "plan": "Store", "limit": 0, "email": "pj.rashidiya@pjprestaurants.com"}, {"id": "445356081", "name": "PJP - ENOC 1019 Al Badaa", "account": "445356081", "desig": "Store", "location": "ENOC 1019 Al Badaa", "locCode": "PJENAB", "plan": "Store", "limit": 0, "email": ""}, {"id": "445356065", "name": "PJP - Mall of the Emirates", "account": "445356065", "desig": "Store", "location": "Mall of the Emirates", "locCode": "PJMOE", "plan": "Store", "limit": 0, "email": "pj.moe@pjprestaurants.com"}, {"id": "43451807", "name": "PJP - Al Quoz", "account": "43451807", "desig": "Store", "location": "Al Quoz", "locCode": "PJAQZ", "plan": "Store", "limit": 0, "email": ""}, {"id": "445363781", "name": "PJP - Dubai Mall", "account": "445363781", "desig": "Store", "location": "Dubai Mall", "locCode": "PJDBM", "plan": "Store", "limit": 0, "email": "pj.dubaimall@pjprestaurants.com"}, {"id": "464704118", "name": "PJP - Al Zahia City Centre", "account": "464704118", "desig": "Store", "location": "Al Zahia City Centre", "locCode": "PJAZCC", "plan": "Store", "limit": 0, "email": "pj.azcc@pjprestaurants.com"}, {"id": "445365175", "name": "PJP - ENOC 1076 Dubai Hills", "account": "445365175", "desig": "Store", "location": "ENOC 1076 Dubai Hills", "locCode": "PJENDH", "plan": "Store", "limit": 0, "email": "pj.dubaihills@pjprestaurants.com"}, {"id": "464712858", "name": "PJP - ENOC 1135 Al Homah", "account": "464712858", "desig": "Store", "location": "ENOC 1135 Al Homah", "locCode": "PJENHO", "plan": "Store", "limit": 0, "email": "pj.alhomah@pjprestaurants.com"}, {"id": "445377997", "name": "PJP - J3 Mall", "account": "445377997", "desig": "Store", "location": "J3 Mall", "locCode": "PJJ3M", "plan": "Store", "limit": 0, "email": "pj.j3mall@pjprestaurants.com"}, {"id": "427323678", "name": "PJP - Forsan Central Mall", "account": "427323678", "desig": "Store", "location": "Forsan Central Mall", "locCode": "PJFCM", "plan": "Store", "limit": 0, "email": "pj.forsan@pjprestaurants.com"}, {"id": "435614306", "name": "PJP - Makani Zakher Alain", "account": "435614306", "desig": "Store", "location": "Makani Zakher Alain", "locCode": "PJMZA", "plan": "Store", "limit": 0, "email": "pj.makani@pjprestaurants.com"}, {"id": "445384373", "name": "PJP - ENOC 85 SZR Tecom", "account": "445384373", "desig": "Store", "location": "ENOC 85 SZR Tecom", "locCode": "PJENTC", "plan": "Store", "limit": 0, "email": "pj.entc@pjprestaurants.com"}, {"id": "445385036", "name": "PJP - ENOC 98 Beirut Street", "account": "445385036", "desig": "Store", "location": "ENOC 98 Beirut Street", "locCode": "PJENBS", "plan": "Store", "limit": 0, "email": "pj.enbs@pjprestaurants.com"}, {"id": "445386329", "name": "PJP - ENOC 89 Al Khawaneej", "account": "445386329", "desig": "Store", "location": "ENOC 89 Al Khawaneej", "locCode": "PJENAK", "plan": "Store", "limit": 0, "email": "pj.enak@pjprestaurants.com"}, {"id": "445386281", "name": "PJP - ENOC 93 Jumeriah 3", "account": "445386281", "desig": "Store", "location": "ENOC 93 Jumeriah 3", "locCode": "PJENJM", "plan": "Store", "limit": 0, "email": "pj.enjm@pjprestaurants.com"}, {"id": "445386325", "name": "PJP - Dubai Hills Mall", "account": "445386325", "desig": "Store", "location": "Dubai Hills Mall", "locCode": "PJDHM", "plan": "Store", "limit": 0, "email": "pj.dhm@pjprestaurants.com"}, {"id": "445387187", "name": "PJP - ENOC 95 Nad Al Hamar", "account": "445387187", "desig": "Store", "location": "ENOC 95 Nad Al Hamar", "locCode": "PJENNH", "plan": "Store", "limit": 0, "email": "pj.ennh@pjprestaurants.com"}, {"id": "464723998", "name": "PJP - Murad Mall", "account": "464723998", "desig": "Store", "location": "Murad Mall", "locCode": "PJMUM", "plan": "Store", "limit": 0, "email": "pj.muradmall@pjprestaurants.com"}, {"id": "72081189", "name": "PJP - City Centre Al Dhait", "account": "72081189", "desig": "Store", "location": "City Centre Al Dhait", "locCode": "PJCCA", "plan": "Store", "limit": 0, "email": "pj.cca@pjprestaurants.com"}, {"id": "65260559", "name": "PJP - Union Coop UAQ", "account": "65260559", "desig": "Store", "location": "Union Coop UAQ", "locCode": "PJUC", "plan": "Store", "limit": 0, "email": "pj.ucuaq@pjprestaurants.com"}, {"id": "26410051", "name": "PJP - Reem Mall", "account": "26410051", "desig": "Store", "location": "Reem Mall", "locCode": "PJRMM", "plan": "Store", "limit": 0, "email": "pj.reemmall@pjprestaurants.com"}, {"id": "37626058", "name": "PJP - Makani Zakher Alain", "account": "37626058", "desig": "Store", "location": "Makani Zakher Alain", "locCode": "PJMZA", "plan": "Store", "limit": 0, "email": "pj.makani@pjprestaurants.com"}, {"id": "427338298", "name": "PJP - Reem Mall", "account": "427338298", "desig": "Store", "location": "Reem Mall", "locCode": "PJRMM", "plan": "Store", "limit": 0, "email": "pj.reemmall@pjprestaurants.com"}, {"id": "445393853", "name": "PJP - ENOC 1042 DIP", "account": "445393853", "desig": "Store", "location": "ENOC 1042 DIP", "locCode": "PJENDIP", "plan": "Store", "limit": 0, "email": "pj.endip@pjprestaurants.com"}, {"id": "427339935", "name": "PJP - Abu Dhabi Mall", "account": "427339935", "desig": "Store", "location": "Abu Dhabi Mall", "locCode": "PJADM", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "42624303", "name": "PJP - ENOC 1042 DIP", "account": "42624303", "desig": "Store", "location": "ENOC 1042 DIP", "locCode": "PJENDIP", "plan": "Store", "limit": 0, "email": "pj.endip@pjprestaurants.com"}, {"id": "464729300", "name": "PJP - Matajer Al Juraina", "account": "464729300", "desig": "Store", "location": "Matajer Al Juraina", "locCode": "PJMAJ", "plan": "Store", "limit": 0, "email": "pj.aljuraina@pjprestaurants.com"}, {"id": "26316976", "name": "PJP - Mushrif Mall", "account": "26316976", "desig": "Store", "location": "Mushrif Mall", "locCode": "PJMRM", "plan": "Store", "limit": 0, "email": "pj.mushrifmall@pjprestaurants.com"}, {"id": "427341035", "name": "PJP - Mushrif Mall", "account": "427341035", "desig": "Store", "location": "Mushrif Mall", "locCode": "PJMRM", "plan": "Store", "limit": 0, "email": "pj.mushrifmall@pjprestaurants.com"}, {"id": "43401308", "name": "PJP - Deira Enrichment", "account": "43401308", "desig": "Store", "location": "Deira Enrichment", "locCode": "PJDEN", "plan": "Store", "limit": 0, "email": "pj.den@pjprestaurants.com"}, {"id": "445395874", "name": "PJP - Deira Enrichment", "account": "445395874", "desig": "Store", "location": "Deira Enrichment", "locCode": "PJDEN", "plan": "Store", "limit": 0, "email": "pj.den@pjprestaurants.com"}, {"id": "26351757", "name": "PJP - Abu Dhabi Mall", "account": "26351757", "desig": "Store", "location": "Abu Dhabi Mall", "locCode": "PJADM", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "65379817", "name": "PJP - Matajer Al Juraina", "account": "65379817", "desig": "Store", "location": "Matajer Al Juraina", "locCode": "PJMAJ", "plan": "Store", "limit": 0, "email": "pj.aljuraina@pjprestaurants.com"}, {"id": "427343257", "name": "PJP - City Centre Masdar", "account": "427343257", "desig": "Store", "location": "City Centre Masdar", "locCode": "PJMSC", "plan": "Store", "limit": 0, "email": "pj.masdar@pjprestaurants.com"}, {"id": "28825294", "name": "PJP - City Centre Masdar", "account": "28825294", "desig": "Store", "location": "City Centre Masdar", "locCode": "PJMSC", "plan": "Store", "limit": 0, "email": "pj.masdar@pjprestaurants.com"}, {"id": "25644317", "name": "PJP - Deerfields Mall", "account": "25644317", "desig": "Store", "location": "Deerfields Mall", "locCode": "PJDFM", "plan": "Store", "limit": 0, "email": "pj.derfield@pjprestaurants.com"}, {"id": "25460646", "name": "PJP - Marina Mall", "account": "25460646", "desig": "Store", "location": "Marina Mall", "locCode": "PJAMM", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "48941666", "name": "PJP - Restaurant Support Center - Call center PR", "account": "48941666", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": ""}, {"id": "42890491", "name": "PJP - Souq Extra DSO", "account": "42890491", "desig": "Store", "location": "Souq Extra DSO", "locCode": "PJSED", "plan": "Store", "limit": 0, "email": "pj.dso@pjprestaurants.com"}, {"id": "445398818", "name": "PJP - Souq Extra DSO", "account": "445398818", "desig": "Store", "location": "Souq Extra DSO", "locCode": "PJSED", "plan": "Store", "limit": 0, "email": "pj.dso@pjprestaurants.com"}, {"id": "9.00E+11", "name": "PJP - Internet account of RSC Office", "account": "9.00E+11", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": ""}, {"id": "45140115", "name": "PJP - Restaurant Support Center - Office Land Line", "account": "45140115", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": ""}, {"id": "45473502", "name": "PJP - Palm Jumeirah Mall", "account": "45473502", "desig": "Store", "location": "Palm Jumeirah Mall", "locCode": "PJNM", "plan": "Store", "limit": 0, "email": "pj.nakheelmall@pjprestaurants.com"}, {"id": "45473494", "name": "PJP - Damac Hills Mall", "account": "45473494", "desig": "Store", "location": "Damac Hills Mall", "locCode": "PJVNM", "plan": "Store", "limit": 0, "email": "pj.damachillsmall@pjprestaurants.com"}, {"id": "445401853", "name": "PJP - Damac Hills Mall", "account": "445401853", "desig": "Store", "location": "Damac Hills Mall", "locCode": "PJVNM", "plan": "Store", "limit": 0, "email": "pj.damachillsmall@pjprestaurants.com"}, {"id": "445402373", "name": "PJP - Palm Jumeirah Mall", "account": "445402373", "desig": "Store", "location": "Palm Jumeirah Mall", "locCode": "PJNM", "plan": "Store", "limit": 0, "email": "pj.nakheelmall@pjprestaurants.com"}, {"id": "25853685", "name": "PJP - Shakhbout City", "account": "25853685", "desig": "Store", "location": "Shakhbout City", "locCode": "PJSHK", "plan": "Store", "limit": 0, "email": "pj.shakhboutcity@pjprestaurants.com"}, {"id": "427348175", "name": "PJP - Al Falah Mall", "account": "427348175", "desig": "Store", "location": "Al Falah Mall", "locCode": "PJALF", "plan": "Store", "limit": 0, "email": "pj.alfalah@pjprestaurants.com"}, {"id": "25861497", "name": "PJP - Al Falah Mall", "account": "25861497", "desig": "Store", "location": "Al Falah Mall", "locCode": "PJALF", "plan": "Store", "limit": 0, "email": "pj.alfalah@pjprestaurants.com"}, {"id": "25841697", "name": "PJP - ADNOC 913 Khalidiya", "account": "25841697", "desig": "Store", "location": "ADNOC 913 Khalidiya", "locCode": "PJACKH", "plan": "Store", "limit": 0, "email": "pj.adnoc913@pjprestaurants.com"}, {"id": "26275125", "name": "PJP - AUH QCC", "account": "26275125", "desig": "Store", "location": "AUH QCC", "locCode": "PJADQCC", "plan": "Store", "limit": 0, "email": "pjqcc.uae@pjprestaurants.com"}, {"id": "427348458", "name": "PJP - ADNOC 913 Khalidiya", "account": "427348458", "desig": "Store", "location": "ADNOC 913 Khalidiya", "locCode": "PJACKH", "plan": "Store", "limit": 0, "email": "pj.adnoc913@pjprestaurants.com"}, {"id": "427348795", "name": "PJP - AUH QCC", "account": "427348795", "desig": "Store", "location": "AUH QCC", "locCode": "PJADQCC", "plan": "Store", "limit": 0, "email": "pjqcc.uae@pjprestaurants.com"}, {"id": "48520130", "name": "PJP - Midtown IMPZ", "account": "48520130", "desig": "Store", "location": "Midtown IMPZ", "locCode": "PJIMPZ", "plan": "Store", "limit": 0, "email": "pj.impz@pjprestaurants.com"}, {"id": "28867309", "name": "PJP - Forsan Central Mall", "account": "28867309", "desig": "Store", "location": "Forsan Central Mall", "locCode": "PJFCM", "plan": "Store", "limit": 0, "email": "pj.forsan@pjprestaurants.com"}, {"id": "37514497", "name": "PJP - Al Ain Mall", "account": "37514497", "desig": "Store", "location": "Al Ain Mall", "locCode": "PJAAM", "plan": "Store", "limit": 0, "email": "pj.alainmall@pjprestaurants.com"}, {"id": "37840735", "name": "PJP - Bawadi Mall", "account": "37840735", "desig": "Store", "location": "Bawadi Mall", "locCode": "PJBWM", "plan": "Store", "limit": 0, "email": "pj.bawadi@pjprestaurants.com"}, {"id": "445405056", "name": "PJP - Midtown IMPZ", "account": "445405056", "desig": "Store", "location": "Midtown IMPZ", "locCode": "PJIMPZ", "plan": "Store", "limit": 0, "email": "pj.impz@pjprestaurants.com"}, {"id": "24456569", "name": "PJP - Dalma Mall", "account": "24456569", "desig": "Store", "location": "Dalma Mall", "locCode": "PJDLM", "plan": "Store", "limit": 0, "email": "pj.dalma@pjprestaurants.com"}, {"id": "24446203", "name": "PJP - Souq AlJami'", "account": "24446203", "desig": "Store", "location": "Souq AlJami'", "locCode": "PJGM", "plan": "Store", "limit": 0, "email": "pj.souqaljami@pjprestaurants.com"}, {"id": "37843734", "name": "PJP - Wahat Hili Mall", "account": "37843734", "desig": "Store", "location": "Wahat Hili Mall", "locCode": "PJWHM", "plan": "Store", "limit": 0, "email": "pj.wahthili@pjprestaurants.com"}, {"id": "25576741", "name": "PJP - Mazyad Mall", "account": "25576741", "desig": "Store", "location": "Mazyad Mall", "locCode": "PJMZM", "plan": "Store", "limit": 0, "email": "PJ.mazyad@pjprestaurants.com"}, {"id": "26426323", "name": "PJP - Madinat Zayed", "account": "26426323", "desig": "Store", "location": "Madinat Zayed", "locCode": "PJMZ", "plan": "Store", "limit": 0, "email": "pj.madinatzayed@pjprestaurants.com"}, {"id": "26354654", "name": "PJP - Khalidiya Mall", "account": "26354654", "desig": "Store", "location": "Khalidiya Mall FC", "locCode": "PJKMFC", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "25821676", "name": "PJP - Al Wahda Mall", "account": "25821676", "desig": "Store", "location": "Al Wahda Mall", "locCode": "PJAWM", "plan": "Store", "limit": 0, "email": "pj.adm@pjprestaurants.com"}, {"id": "65513324", "name": "PJP - Mega Mall", "account": "65513324", "desig": "Store", "location": "Mega Mall", "locCode": "PJMM", "plan": "Store", "limit": 0, "email": "pj.megamall@pjprestaurants.com"}, {"id": "65319053", "name": "PJP - Sahara Centre", "account": "65319053", "desig": "Store", "location": "Sahara Centre", "locCode": "PJSC", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "45470926", "name": "PJP - J3 Mall", "account": "45470926", "desig": "Store", "location": "J3 Mall", "locCode": "PJJ3M", "plan": "Store", "limit": 0, "email": "pj.j3mall@pjprestaurants.com"}, {"id": "67675135", "name": "PJP - ENOC 1135 Al Homah", "account": "67675135", "desig": "Store", "location": "ENOC 1135 Al Homah", "locCode": "PJENHO", "plan": "Store", "limit": 0, "email": "pj.alhomah@pjprestaurants.com"}, {"id": "42540894", "name": "PJP - Mamzar Centre", "account": "42540894", "desig": "Store", "location": "Mamzar Centre", "locCode": "PJMC", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "72357893", "name": "PJP - Manar Mall", "account": "72357893", "desig": "Store", "location": "Manar Mall", "locCode": "PJMNM", "plan": "Store", "limit": 0, "email": "pj.manarmall@pjprestaurants.com"}, {"id": "42354129", "name": "PJP - ENOC 85 SZR Tecom", "account": "42354129", "desig": "Store", "location": "ENOC 85 SZR Tecom", "locCode": "PJENTC", "plan": "Store", "limit": 0, "email": "pj.entc@pjprestaurants.com"}, {"id": "42581319", "name": "PJP - ENOC 98 Beirut Street", "account": "42581319", "desig": "Store", "location": "ENOC 98 Beirut Street", "locCode": "PJENBS", "plan": "Store", "limit": 0, "email": "pj.enbs@pjprestaurants.com"}, {"id": "43352523", "name": "PJP - Eleganza Plaza", "account": "43352523", "desig": "Store", "location": "Eleganza Plaza", "locCode": "PJELG", "plan": "Store", "limit": 0, "email": "pj.eleganza@pjprestaurants.com"}, {"id": "43427627", "name": "PJP - ENOC 1019 Al Badaa", "account": "43427627", "desig": "Store", "location": "ENOC 1019 Al Badaa", "locCode": "PJENAB", "plan": "Store", "limit": 0, "email": ""}, {"id": "42399505", "name": "PJP - Deira City Centre", "account": "42399505", "desig": "Store", "location": "Deira City Centre", "locCode": "PJDCC", "plan": "Store", "limit": 0, "email": "pj.dcc@pjprestaurants.com"}, {"id": "42660565", "name": "PJP - ENOC 89 Al Khawaneej", "account": "42660565", "desig": "Store", "location": "ENOC 89 Al Khawaneej", "locCode": "PJENAK", "plan": "Store", "limit": 0, "email": "pj.enak@pjprestaurants.com"}, {"id": "43437362", "name": "PJP - Serena Community Centre", "account": "43437362", "desig": "Store", "location": "Serena Community Centre", "locCode": "PJSER", "plan": "Store", "limit": 0, "email": "pj.serena@pjprestaurants.com"}, {"id": "67414232", "name": "PJP - ENOC 212, Ajman", "account": "67414232", "desig": "Store", "location": "ENOC 212, Ajman", "locCode": "PJEPAJ", "plan": "Store", "limit": 0, "email": "pj.ach@pjprestaurants.com"}, {"id": "65695213", "name": "PJP - Rumailah Ajman", "account": "65695213", "desig": "Store", "location": "Rumailah Ajman", "locCode": "PJRUAJ", "plan": "Store", "limit": 0, "email": "pj.ach@pjprestaurants.com"}, {"id": "67400435", "name": "PJP - Emarat Ajman", "account": "67400435", "desig": "Store", "location": "Emarat Ajman", "locCode": "PJEMAJ", "plan": "Store", "limit": 0, "email": "pj.ajman@pjprestaurants.com"}, {"id": "65321137", "name": "PJP - Grand Avenue", "account": "65321137", "desig": "Store", "location": "Grand Avenue", "locCode": "PJGA", "plan": "Store", "limit": 0, "email": "pj.grandavenue@pjprestaurants.com"}, {"id": "42328838", "name": "PJP - Dubai Festival City", "account": "42328838", "desig": "Store", "location": "Dubai Festival City", "locCode": "PJDFC", "plan": "Store", "limit": 0, "email": "pj.dfc@pjprestaurants.com"}, {"id": "42361763", "name": "PJP - ENOC 1081 Al Warqa", "account": "42361763", "desig": "Store", "location": "ENOC 1081 Al Warqa", "locCode": "PJENAW", "plan": "Store", "limit": 0, "email": "pj.mirdiff@pjprestaurants.com"}, {"id": "42611837", "name": "PJP - Al Barsha Mall", "account": "42611837", "desig": "Store", "location": "Al Barsha Mall", "locCode": "PJABM", "plan": "Store", "limit": 0, "email": "pj.barsha@pjprestaurants.com"}, {"id": "96061556", "name": "PJP - ENOC 1505 Al Faseel, Fujairah", "account": "96061556", "desig": "Store", "location": "ENOC 1505 Al Faseel, Fujairah", "locCode": "PJENAF", "plan": "Store", "limit": 0, "email": "pj.enaf@pjprestaurants.com"}, {"id": "65353836", "name": "PJP - Murad Mall", "account": "65353836", "desig": "Store", "location": "Murad Mall", "locCode": "PJMUM", "plan": "Store", "limit": 0, "email": "pj.muradmall@pjprestaurants.com"}, {"id": "42369235", "name": "PJP - ENOC 1076 Dubai Hills", "account": "42369235", "desig": "Store", "location": "ENOC 1076 Dubai Hills", "locCode": "PJENDH", "plan": "Store", "limit": 0, "email": "pj.dubaihills@pjprestaurants.com"}, {"id": "72332256", "name": "PJP - Al Hamra Mall", "account": "72332256", "desig": "Store", "location": "Al Hamra Mall", "locCode": "PJAHM", "plan": "Store", "limit": 0, "email": "pj.alhamra@pjprestaurants.com"}, {"id": "42954264", "name": "PJP - Concord Tower DMC", "account": "42954264", "desig": "Store", "location": "Concord Tower DMC", "locCode": "PJCDMC", "plan": "Store", "limit": 0, "email": "pj.cdmc@pjprestaurants.com"}, {"id": "45481068", "name": "PJP - Dubai Mall", "account": "45481068", "desig": "Store", "location": "Dubai Mall", "locCode": "PJDBM", "plan": "Store", "limit": 0, "email": "pj.dubaimall@pjprestaurants.com"}, {"id": "43806122", "name": "PJP - QCC Dubai", "account": "43806122", "desig": "Store", "location": "QCC Dubai", "locCode": "PJQCC", "plan": "Store", "limit": 0, "email": "pj.dfc@pjprestaurants.com"}, {"id": "43592323", "name": "PJP - Burjuman Centre", "account": "43592323", "desig": "Store", "location": "Burjuman Centre", "locCode": "PJBJC", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "42864478", "name": "PJP - ENOC 15 Rashidiya", "account": "42864478", "desig": "Store", "location": "ENOC 15 Rashidiya", "locCode": "PJENRAS", "plan": "Store", "limit": 0, "email": "pj.rashidiya@pjprestaurants.com"}, {"id": "65461434", "name": "PJP - Al Zahia City Centre", "account": "65461434", "desig": "Store", "location": "Al Zahia City Centre", "locCode": "PJAZCC", "plan": "Store", "limit": 0, "email": "pj.azcc@pjprestaurants.com"}, {"id": "43350412", "name": "PJP - ENOC 93 Jumeriah 3", "account": "43350412", "desig": "Store", "location": "ENOC 93 Jumeriah 3", "locCode": "PJENJM", "plan": "Store", "limit": 0, "email": "pj.enjm@pjprestaurants.com"}, {"id": "42284001", "name": "PJP - Al Ghurair Centre", "account": "42284001", "desig": "Store", "location": "Al Ghurair Centre", "locCode": "PJAGR", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "42382765", "name": "PJP - ENOC 84 Al Qusais", "account": "42382765", "desig": "Store", "location": "ENOC 84 Al Qusais", "locCode": "PJENAQ", "plan": "Store", "limit": 0, "email": "pj.alquasis@pjprestaurants.com"}, {"id": "65469629", "name": "PJP - Matajer Al Musalla", "account": "65469629", "desig": "Store", "location": "Matajer Al Musalla", "locCode": "PJMMU", "plan": "Store", "limit": 0, "email": "pj.matajermusalla@pjprestaurants.com"}, {"id": "43390855", "name": "PJP - Dubai Hills Mall", "account": "43390855", "desig": "Store", "location": "Dubai Hills Mall", "locCode": "PJDHM", "plan": "Store", "limit": 0, "email": "pj.dhm@pjprestaurants.com"}, {"id": "65464843", "name": "PJP - Matajer Al Khan", "account": "65464843", "desig": "Store", "location": "Matajer Al Khan", "locCode": "PJMAK", "plan": "Store", "limit": 0, "email": "pj.matajeralkhan@pjprestaurants.com"}, {"id": "43795751", "name": "PJP - Wafi Mall", "account": "43795751", "desig": "Store", "location": "Wafi Mall", "locCode": "PJWM", "plan": "Store", "limit": 0, "email": "pj.wafi@pjprestaurants.com"}, {"id": "45470506", "name": "PJP - Azizi Riviera Meydan", "account": "45470506", "desig": "Store", "location": "Azizi Riviera Meydan", "locCode": "PJARM", "plan": "Store", "limit": 0, "email": "pj.aziziriviera@pjprestaurants.com"}, {"id": "42666403", "name": "PJP - ENOC 1001 Al Twar", "account": "42666403", "desig": "Store", "location": "ENOC 1001 Al Twar", "locCode": "PJENAT", "plan": "Store", "limit": 0, "email": "pj.altawar@pjprestaurants.com"}, {"id": "42828975", "name": "PJP - ENOC 1005 Garhoud", "account": "42828975", "desig": "Store", "location": "ENOC 1005 Garhoud", "locCode": "PJENGH", "plan": "Store", "limit": 0, "email": "pj.garhoud@pjprestaurants.com"}, {"id": "43356051", "name": "PJP - ENOC 95 Nad Al Hamar", "account": "43356051", "desig": "Store", "location": "ENOC 95 Nad Al Hamar", "locCode": "PJENNH", "plan": "Store", "limit": 0, "email": "pj.ennh@pjprestaurants.com"}, {"id": "43978217", "name": "PJP - Al Karama", "account": "43978217", "desig": "Store", "location": "Al Karama", "locCode": "PJKAR", "plan": "Store", "limit": 0, "email": "pj.karama@pjprestaurants.com"}, {"id": "37626050", "name": "PJP - Shabhat Plaza", "account": "37626050", "desig": "Store", "location": "Shabhat Plaza", "locCode": "PJSP", "plan": "Store", "limit": 0, "email": "pj.shabat@pjprestaurants.com"}, {"id": "92248646", "name": "PJP - Lulu Mall, Fujairah", "account": "92248646", "desig": "Store", "location": "Lulu Mall, Fujairah", "locCode": "PJLMF", "plan": "Store", "limit": 0, "email": "pj.lulu@pjprestaurants.com"}, {"id": "65238162", "name": "PJP - The One Suyoh", "account": "65238162", "desig": "Store", "location": "The One Suyoh", "locCode": "PJSYM", "plan": "Store", "limit": 0, "email": "pj.suyoh@pjprestaurants.com"}, {"id": "43466375", "name": "PJP - Al Furjan South Pavilion", "account": "43466375", "desig": "Store", "location": "Al Furjan South Pavilion", "locCode": "PJAFP", "plan": "Store", "limit": 0, "email": "pj.alfurjan@pjprestaurants.com"}, {"id": "92566847", "name": "PJP - Khorfakkan Beach", "account": "92566847", "desig": "Store", "location": "Khorfakkan Beach", "locCode": "PJKB", "plan": "Store", "limit": 0, "email": "pj.khorfakkanbeach@pjprestaurants.com"}, {"id": "42657458", "name": "PJP - ENOC 1033 Jumeirah Village Circle", "account": "42657458", "desig": "Store", "location": "ENOC 1033 Jumeirah Village Circle", "locCode": "PJENJVC", "plan": "Store", "limit": 0, "email": "pj.jvc@pjprestaurants.com"}, {"id": "42964831", "name": "PJP - New Meadows Village", "account": "42964831", "desig": "Store", "location": "New Meadows Village", "locCode": "PJNMV", "plan": "Store", "limit": 0, "email": "pj.nmv@pjprestaurants.com"}, {"id": "48924856", "name": "PJP - IBN Battuta Mall", "account": "48924856", "desig": "Store", "location": "IBN Battuta Mall", "locCode": "PJIBN", "plan": "Store", "limit": 0, "email": "pj.ibn@pjprestaurants.com"}, {"id": "48524964", "name": "PJP - ENOC 6549 JLT D Cluster", "account": "48524964", "desig": "Store", "location": "ENOC 6549 JLT D Cluster", "locCode": "PJENJLT", "plan": "Store", "limit": 0, "email": "pj.enjlt@pjprestaurants.com"}, {"id": "42989348", "name": "PJP - Mirdif City Centre", "account": "42989348", "desig": "Store", "location": "Mirdif City Centre North", "locCode": "PJMCN", "plan": "Store", "limit": 0, "email": "pj.alghurair@pjprestaurants.com"}, {"id": "65360655", "name": "PJP - The One Rahmania", "account": "65360655", "desig": "Store", "location": "The One Rahmania", "locCode": "PJRHM", "plan": "Store", "limit": 0, "email": "pj.rahmania@pjprestaurants.com"}, {"id": "9.00E+11_E+11", "name": "PJP - Restaurant Support Center -CAAS", "account": "9.00E+11", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": ""}, {"id": "42514868", "name": "PJP - Bay Avenue", "account": "42514868", "desig": "Store", "location": "Bay Avenue", "locCode": "PJBA", "plan": "Store", "limit": 0, "email": "pj.bayavenue@pjprestaurants.com"}, {"id": "42682753", "name": "Dubai International City", "account": "42682753", "desig": "Store", "location": "Dubai International City", "locCode": "PJDIC", "plan": "Store", "limit": 0, "email": "pj.dfc@pjprestaurants.com"}, {"id": "42965226", "name": "Marina Diamond", "account": "42965226", "desig": "Store", "location": "Marina Diamond", "locCode": "PJDM", "plan": "Store", "limit": 0, "email": "pj.marinadxb@pjprestaurants.com"}, {"id": "26671023", "name": "PJP - Yas Island Water’s Edge", "account": "26671023", "desig": "Store", "location": "Yas Island Water’s Edge", "locCode": "PJYWE", "plan": "Store", "limit": 0, "email": "pj.yas@pjprestaurants.com"}, {"id": "43203642", "name": "PJP - Mall of the Emirates", "account": "43203642", "desig": "Store", "location": "Mall of the Emirates", "locCode": "PJMOE", "plan": "Store", "limit": 0, "email": "pj.moe@pjprestaurants.com"}, {"id": "43458151", "name": "PJP - QCC DIP", "account": "43458151", "desig": "Store", "location": "QCC DIP", "locCode": "PJQCD", "plan": "Store", "limit": 0, "email": "pj.endip@pjprestaurants.com"}, {"id": "22970", "name": "Aromal Pathikal", "account": "501062471", "desig": "Assistant HR Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "aromal.pathikal@pjprestaurants.com"}, {"id": "43559575", "name": "PJP - Bay Square", "account": "43559575", "desig": "Store", "location": "Bay Square", "locCode": "PJBSQ", "plan": "Store", "limit": 0, "email": "pj.baysquare@pjprestaurants.com"}, {"id": "26435598", "name": "PJP - ADNOC 169 Motorworld", "account": "26435598", "desig": "Store", "location": "ADNOC 169 Motorworld", "locCode": "PJAMW", "plan": "Store", "limit": 0, "email": "pj.adnoc169@pjprestaurants.com"}, {"id": "65347041", "name": "PJP - Muweilah Commercial Area", "account": "65347041", "desig": "Store", "location": "Muweilah Commercial Area", "locCode": "PJMUW", "plan": "Store", "limit": 0, "email": "pj.muweilah@pjprestaurants.com"}, {"id": "42354719", "name": "PJP - Motor City", "account": "42354719", "desig": "Store", "location": "Motor City", "locCode": "PJMCT", "plan": "Store", "limit": 0, "email": "pj.motorcity@pjprestaurants.com"}, {"id": "65344397", "name": "PJP - Ajman Corniche", "account": "65344397", "desig": "Store", "location": "Ajman Corniche", "locCode": "PJACH", "plan": "Store", "limit": 0, "email": "pj.ach@pjprestaurants.com"}, {"id": "26338167", "name": "PJP - MBZ City", "account": "26338167", "desig": "Store", "location": "MBZ City", "locCode": "PJMBZ", "plan": "Store", "limit": 0, "email": "pj.mbz@pjprestaurants.com"}, {"id": "22938", "name": "Meenakshy Menon", "account": "565024380", "desig": "Junior Accountant", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "meenakshy.menon@pjprestaurants.com"}, {"id": "22973", "name": "Geetika Kasturi", "account": "0542269418", "desig": "Regional CRM and B2B Partnership Manager", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "geetika.kasturi@pjprestaurants.com"}, {"id": "900106256300", "name": "PJP - Restaurant Support Center", "account": "900106256300", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": "pj.burjuman@pjprestaurants.com"}, {"id": "900104728045", "name": "PJP - Restaurant Support Center", "account": "900104728045", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": "pj.burjuman@pjprestaurants.com"}, {"id": "900104728021", "name": "PJP - Restaurant Support Center", "account": "900104728021", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": "pj.burjuman@pjprestaurants.com"}, {"id": "900104306541", "name": "PJP - Restaurant Support Center", "account": "900104306541", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": "pj.burjuman@pjprestaurants.com"}, {"id": "900103518073", "name": "PJP - Restaurant Support Center", "account": "900103518073", "desig": "Store", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Store", "limit": 0, "email": "pj.burjuman@pjprestaurants.com"}, {"id": "21174_0516", "name": "Inaam UR Rehman", "account": "564110516", "desig": "Motorbike Delivery Driver", "location": "427030", "locCode": "PJAHM", "plan": "Basic", "limit": 100, "email": ""}, {"id": "21212_6276", "name": "Mahmoud Mahmoud Nasr Hassanin", "account": "561886276", "desig": "Motorbike Delivery Driver", "location": "Mamzar Centre", "locCode": "PJMC", "plan": "Driver", "limit": 100, "email": "mahmoud.aburahma@pjprestaurants.com"}, {"id": "37644361", "name": "PJP - Al Jimi Mall AAN", "account": "37644361", "desig": "Store", "location": "Al Jimi Mall AAN", "locCode": "PJJMI", "plan": "Store", "limit": 0, "email": "pj.jimi@pjprestaurants.com"}, {"id": "22697", "name": "Syeda Hiba Zaidi", "account": "569960210", "desig": "Senior Financial Planning Analyst", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Pro", "limit": 300, "email": "hiba.zaidi@pjprestaurants.com"}, {"id": "22908", "name": "Elston Shon Dsouza", "account": "563298304", "desig": "Senior IT Engineer", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "elston.dsouza@pjprestaurants.com"}, {"id": "22878", "name": "Marwa Alhassan", "account": "565261267", "desig": "Receptionist", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": "marwa.alhassan@pjprestaurants.com"}, {"id": "22776", "name": "Ahmed Soltan Hanfy Mohamed", "account": "501073953", "desig": "Maintenance Technician", "location": "Restaurant Support Center", "locCode": "PJRSC", "plan": "Standard", "limit": 150, "email": ""}, {"id": "22224", "name": "Deepak Jogeshwar Sharma", "account": "569968495", "desig": "QCC Shift Manager", "location": "AUH QCC", "locCode": "PJADQCC", "plan": "Pro", "limit": 300, "email": ""}];
+
+// ── Email template ──────────────────────────────────────
+var TMPL = {
+  subject: 'Billing Alert — Your {{plan}} plan bill has exceeded the assigned limit',
+  body: 'Dear {{first_name}},\n\nWe are writing to inform you that your Etisalat mobile billing for {{billing_month}} has exceeded your assigned plan limit.\n\nAccount details:\n  Account ID         : {{emp_id}}\n  Account number     : {{account_no}}\n  Designation        : {{designation}}\n  Location           : {{location}}\n  Plan               : {{plan}}\n  Billing month      : {{billing_month}}\n  Assigned limit     : AED {{limit_aed}}\n  Current bill       : AED {{bill_aed}}\n  Amount exceeded    : AED {{diff_aed}} ({{pct_over}}% above your limit)\n\nPlease contact your account manager to upgrade your plan or settle any outstanding charges at the earliest convenience.\n\nFor support call 101 or email billing@etisalat.ae',
+  sig: 'Warm regards,\nElston Shon Dsouza\nPJP Restaurants\nelston.dsouza@pjprestaurants.com\n+971 4 514 0115'
+};
+var TEMPLATES = [
+  { name: 'Standard alert', subject: TMPL.subject, body: TMPL.body, sig: TMPL.sig },
+  { name: 'Brief alert',
+    subject: 'Action required — Mobile bill exceeded for {{billing_month}}',
+    body: 'Hi {{first_name}},\n\nYour Etisalat mobile bill for {{billing_month}} has exceeded your assigned limit.\n\n  Plan limit : AED {{limit_aed}}\n  Your bill  : AED {{bill_aed}}\n  Over by    : AED {{diff_aed}} ({{pct_over}}%)\n\nKindly contact your account manager to resolve this. For queries call 101.',
+    sig: 'Regards,\nElston Shon Dsouza\nPJP Restaurants' },
+  { name: 'Manager copy',
+    subject: 'Escalation — {{full_name}} exceeded mobile plan limit by {{pct_over}}%',
+    body: 'Dear Manager,\n\nThis is to inform you that the following employee has exceeded their assigned Etisalat mobile plan limit for {{billing_month}}.\n\n  Employee       : {{full_name}} ({{emp_id}})\n  Designation    : {{designation}}\n  Location       : {{location}}\n  Account no.    : {{account_no}}\n  Plan           : {{plan}}\n  Assigned limit : AED {{limit_aed}}\n  Current bill   : AED {{bill_aed}}\n  Exceeded by    : AED {{diff_aed}} ({{pct_over}}%)\n\nKindly take the necessary action.',
+    sig: 'Best regards,\nElston Shon Dsouza\nPJP Restaurants' },
+  { name: 'Friendly reminder',
+    subject: 'Quick note — Your mobile usage for {{billing_month}}',
+    body: 'Hi {{first_name}},\n\nHope you are well! Just a quick heads-up about your Etisalat mobile account for {{billing_month}}.\n\nYour current bill of AED {{bill_aed}} is AED {{diff_aed}} above your assigned plan limit of AED {{limit_aed}}.\n\nNo urgent action needed, but if you would like to review your usage or upgrade your plan, please reach out to your account manager or contact Etisalat on 101.\n\nThanks!',
+    sig: 'Best,\nElston Shon Dsouza\nPJP Restaurants' }
+];
+var VARS = [
+  {k:'{{first_name}}',l:'First name'},{k:'{{full_name}}',l:'Full name'},{k:'{{emp_id}}',l:'Emp ID'},
+  {k:'{{account_no}}',l:'Account no.'},{k:'{{designation}}',l:'Designation'},{k:'{{location}}',l:'Location'},
+  {k:'{{plan}}',l:'Plan'},{k:'{{limit_aed}}',l:'Limit AED'},{k:'{{bill_aed}}',l:'Bill AED'},
+  {k:'{{diff_aed}}',l:'Over by AED'},{k:'{{pct_over}}',l:'% over'},{k:'{{billing_month}}',l:'Billing month'}
+];
+var PLAN_LIMITS = {Enterprise:500,Pro:300,Standard:150,Basic:100,Driver:100,Store:0};
+var SAMPLE_EMPS = [
+  {id:'19001',name:'Darrell Edward Edon',email:'darrell.edon@pjprestaurants.com',desig:'CFO',location:'RSC',plan:'Enterprise',limit:500,bill:683,account:'549943844'},
+  {id:'10486',name:'Tahereh Rezaei',email:'tahereh.rezaei@pjprestaurants.com',desig:'Supervisor',location:'RSC',plan:'Standard',limit:150,bill:212,account:'549943849'},
+  {id:'22697',name:'Syeda Hiba Zaidi',email:'hiba.zaidi@pjprestaurants.com',desig:'Sr Financial Analyst',location:'RSC',plan:'Pro',limit:300,bill:355,account:'569960210'}
+];
+
+function resolveVars(text, e, mLabel) {
+  if (!e) return text;
+  var diff = e.bill !== null && e.limit > 0 ? Math.max(0, e.bill - e.limit) : 0;
+  var pct  = e.limit > 0 ? Math.round((diff / e.limit) * 100) : 0;
+  return text
+    .replace(/\{\{first_name\}\}/g, e.name.split(' ')[0])
+    .replace(/\{\{full_name\}\}/g, e.name)
+    .replace(/\{\{emp_id\}\}/g, e.id)
+    .replace(/\{\{account_no\}\}/g, e.account)
+    .replace(/\{\{designation\}\}/g, e.desig || '')
+    .replace(/\{\{location\}\}/g, e.location || '')
+    .replace(/\{\{plan\}\}/g, e.plan)
+    .replace(/\{\{limit_aed\}\}/g, e.limit)
+    .replace(/\{\{bill_aed\}\}/g, e.bill !== null ? e.bill : '-')
+    .replace(/\{\{diff_aed\}\}/g, diff)
+    .replace(/\{\{pct_over\}\}/g, pct)
+    .replace(/\{\{billing_month\}\}/g, mLabel || '')
+    .replace(/\{\{sender_name\}\}/g, 'Elston Shon Dsouza');
+}
+function mLabel(key) { return key ? new Date(key+'-01').toLocaleString('default',{month:'long',year:'numeric'}) : ''; }
+function buildSubject(e) { return resolveVars(TMPL.subject, e, mLabel(currentMonth)); }
+function buildBody(e) {
+  if (e.bill === null || e.limit === 0) return 'No billing data for this entry.';
+  var body = resolveVars(TMPL.body, e, mLabel(currentMonth));
+  var sig  = TMPL.sig ? resolveVars(TMPL.sig, e, mLabel(currentMonth)) : '';
+  return body + (sig ? '\n\n' + sig : '');
+}
+
+// ── App state ──────────────────────────────────────────
+var entries = DATA.map(function(e){ return Object.assign({},e,{bill:null}); });
+var sel = new Set(), bFilter='all', rFilter='all', sentCnt=0, logEmpty=true;
+var uploadedRows=[], uploadedCols=[], currentMonth='', monthData={}, docLib=[], selDoc=null;
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function isEmp(e){ return ['Store','Driver'].indexOf(e.plan)===-1; }
+function isDrv(e){ return e.plan==='Driver'; }
+function isStr(e){ return e.plan==='Store'; }
+function isOver(e){ return e.limit>0&&e.bill!==null&&e.bill>e.limit; }
+function isOk(e){ return e.limit>0&&e.bill!==null&&e.bill<=e.limit; }
+function planPill(p){ var m={Enterprise:'E',Pro:'P',Standard:'S',Basic:'B',Driver:'D',Store:'St'}; return '<span class="pp pp'+(m[p]||'B')+'">'+p+'</span>'; }
+function statusPill(e){
+  if(e.limit===0) return '<span class="sp snd">N/A</span>';
+  if(e.bill===null) return '<span class="sp snd">No data</span>';
+  return isOver(e)?'<span class="sp sov">Over limit</span>':'<span class="sp sok">Within limit</span>';
+}
+function getVis(f,q,data){
+  var s=(q||'').toLowerCase();
+  return data.filter(function(e){
+    var mq=!s||e.name.toLowerCase().includes(s)||e.id.includes(s)||e.account.includes(s)||(e.desig||'').toLowerCase().includes(s)||(e.location||'').toLowerCase().includes(s);
+    var mf=f==='all'?true:f==='ov'?isOver(e):f==='ok'?isOk(e):f==='nd'?(!e.bill&&e.limit>0):f==='emp'?isEmp(e):f==='drv'?isDrv(e):f==='str'?isStr(e):f==='E'?e.plan==='Enterprise':f==='P'?e.plan==='Pro':f==='S'?e.plan==='Standard':true;
+    return mq&&mf;
+  });
+}
+
+// ── API ────────────────────────────────────────────────
+function api(method,path,body){
+  var o={method:method,headers:{'Content-Type':'application/json'}};
+  if(body) o.body=JSON.stringify(body);
+  return fetch('/api'+path,o).then(function(r){return r.json();});
+}
+
+// ── Health check ───────────────────────────────────────
+function checkHealth(){
+  api('GET','/health').then(function(d){
+    var b=document.getElementById('apiBadge'), t=document.getElementById('apiTxt');
+    b.className='apibadge '+(d.ok?'api-ok':'api-err');
+    t.textContent=d.ok?'Connected — M365 live':'Backend error';
+  }).catch(function(){
+    var b=document.getElementById('apiBadge'), t=document.getElementById('apiTxt');
+    b.className='apibadge api-err'; t.textContent='Backend offline';
+  });
+}
+
+// ── Month setup ────────────────────────────────────────
+function buildMonths(){
+  var now=new Date(), opts='<option value="">-- Select month --</option>';
+  for(var i=0;i<18;i++){
+    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    var k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    opts+='<option value="'+k+'">'+d.toLocaleString('default',{month:'long',year:'numeric'})+'</option>';
+  }
+  ['monthSel','upMonthSel'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  var def=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  ['monthSel','upMonthSel'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=def;});
+  currentMonth=def; updateMonthBadge();
+}
+function updateMonthBadge(){
+  var s=document.getElementById('monthSel'); if(!s)return;
+  currentMonth=s.value;
+  document.getElementById('mBadge').textContent=currentMonth?mLabel(currentMonth):'No month';
+  entries.forEach(function(e){e.bill=null;});
+  var saved=monthData[currentMonth];
+  if(saved) saved.forEach(function(r){var e=entries.find(function(x){return x.account===r.account;});if(e)e.bill=r.bill;});
+  rB(); updCounts();
+}
+
+// ── Sync master ────────────────────────────────────────
+function syncMaster(){
+  ['syncBtn','syncBtn2'].forEach(function(id){var b=document.getElementById(id);if(b){b.disabled=true;b.innerHTML='<span class="spin"></span> Syncing...';}});
+  setSyncMsg('ing','Syncing from OneDrive...');
+  api('GET','/master/sync').then(function(d){
+    if(!d.ok) throw new Error(d.error);
+    var lines=d.csv.trim().split('\n'), cols=lines[0].split(',').map(function(c){return c.trim().replace(/"/g,'');}), added=0;
+    lines.slice(1).forEach(function(line){
+      if(!line.trim()) return;
+      var vals=line.split(',').map(function(c){return c.trim().replace(/"/g,'');});
+      var row={}; cols.forEach(function(c,i){row[c]=vals[i]||'';});
+      if(!row.id||!row.account) return;
+      var ex=entries.find(function(e){return e.id===row.id||e.account===row.account;});
+      if(!ex){ entries.push({id:row.id,name:row.name||'',account:row.account,desig:row.desig||'',location:row.location||'',locCode:row.locCode||'',plan:row.plan||'Standard',limit:parseInt(row.limit)||150,email:row.email||'',bill:null}); added++; }
+      else if(!ex.email&&row.email) ex.email=row.email;
+    });
+    var now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    setSyncMsg('ok','Synced '+now+(added?' + '+added+' new':''));
+    if(added) toast(added+' new employee(s) added'); else toast('Master synced — up to date');
+    rB(); rR(); updCounts();
+  }).catch(function(e){setSyncMsg('err','Failed: '+e.message); toast('Sync error: '+e.message);})
+  .finally(function(){['syncBtn','syncBtn2'].forEach(function(id){var b=document.getElementById(id);if(b){b.disabled=false;b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Sync master';}});});
+}
+function setSyncMsg(t,m){var el=document.getElementById('syncMsg');if(!el)return;el.style.display='inline-block';el.className='syncmsg sm-'+t;el.textContent=m;}
+
+function saveMaster(){
+  var lines=['id,name,account,desig,location,locCode,plan,limit,email'];
+  entries.forEach(function(e){lines.push([e.id,e.name,e.account,e.desig,e.location,e.locCode||'',e.plan,e.limit,e.email||''].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(','));});
+  api('POST','/master/save',{csv:lines.join('\n')}).then(function(d){if(d.ok)toast('Master saved to OneDrive');else toast('Save error: '+d.error);}).catch(function(e){toast('Save error: '+e.message);});
+}
+
+// ── Render billing ─────────────────────────────────────
+function rB(){
+  var vis=getVis(bFilter,document.getElementById('bsrch').value,entries);
+  document.getElementById('bvc').textContent='Showing '+vis.length+' of '+entries.length;
+  var rows=vis.map(function(e){
+    var s=sel.has(e.id), diff=e.bill!==null?(e.bill-e.limit):null;
+    var row=document.createElement('tr'); if(s) row.className='sel'; row.dataset.id=e.id;
+    row.innerHTML='<td><input type="checkbox"'+(s?' checked':'')+' class="rowchk" data-id="'+esc(e.id)+'"/></td>'+
+      '<td style="font-size:10px;color:var(--t2)">'+esc(e.id)+'</td>'+
+      '<td title="'+esc(e.name)+'">'+esc(e.name)+'</td>'+
+      '<td style="font-size:10px" title="'+esc(e.desig)+'">'+esc(e.desig)+'</td>'+
+      '<td style="font-size:10px">'+esc(e.account)+'</td>'+
+      '<td>'+planPill(e.plan)+'</td>'+
+      '<td>'+(e.limit>0?'AED '+e.limit:'-')+'</td>'+
+      '<td class="'+(isOver(e)?'ov':'')+'">'+( e.bill!==null?'AED '+e.bill:'-')+'</td>'+
+      '<td class="'+(diff!==null&&diff>0?'ov':'')+'">'+( diff!==null?(diff>0?'+':'')+' AED '+diff:'-')+'</td>'+
+      '<td>'+statusPill(e)+'</td>'+
+      '<td><button class="btn qsend" data-id="'+esc(e.id)+'" style="padding:3px 6px;font-size:10px">Send</button></td>';
+    return row;
+  });
+  var tb=document.getElementById('btbody'); tb.innerHTML=''; rows.forEach(function(r){tb.appendChild(r);}); updCounts();
+}
+
+// ── Render registry ────────────────────────────────────
+function rR(){
+  var vis=getVis(rFilter,document.getElementById('rsrch').value,entries);
+  document.getElementById('rvc').textContent='Showing '+vis.length+' of '+entries.length;
+  var rows=vis.map(function(e){
+    var row=document.createElement('tr');
+    row.innerHTML='<td style="font-size:10px;color:var(--t2)">'+esc(e.id)+'</td>'+
+      '<td title="'+esc(e.name)+'">'+esc(e.name)+'</td>'+
+      '<td style="font-size:10px" title="'+esc(e.desig)+'">'+esc(e.desig)+'</td>'+
+      '<td style="font-size:10px">'+esc(e.account)+'</td>'+
+      '<td style="font-size:10px" title="'+esc(e.location)+'">'+esc(e.location)+'</td>'+
+      '<td>'+planPill(e.plan)+'</td>'+
+      '<td>'+(e.limit>0?'AED '+e.limit:'-')+'</td>'+
+      '<td style="font-size:10px;color:var(--b)">'+esc(e.email||'')+'</td>'+
+      '<td><button class="btn editbtn" data-id="'+esc(e.id)+'" style="padding:3px 6px;font-size:10px">Edit</button></td>';
+    return row;
+  });
+  var tb=document.getElementById('rtbody'); tb.innerHTML=''; rows.forEach(function(r){tb.appendChild(r);});
+  document.getElementById('rtot').textContent=entries.length;
+  document.getElementById('rbadge').textContent=entries.length;
+}
+
+function updCounts(){
+  document.getElementById('seln').textContent=sel.size;
+  document.getElementById('s-sel').textContent=sel.size;
+  document.getElementById('s-tot').textContent=entries.length;
+  document.getElementById('s-ov').textContent=entries.filter(isOver).length;
+  document.getElementById('s-ok').textContent=entries.filter(isOk).length;
+  document.getElementById('s-nd').textContent=entries.filter(function(e){return e.bill===null&&e.limit>0;}).length;
+  document.getElementById('sendBtn').disabled=sel.size===0;
+  document.getElementById('prevBtn').disabled=sel.size===0;
+}
+function togU(id,chk){
+  if(chk) sel.add(id); else sel.delete(id);
+  document.querySelectorAll('[data-id="'+CSS.escape(id)+'"]').forEach(function(r){if(r.tagName==='TR')r.className=chk?'sel':'';if(r.type==='checkbox')r.checked=chk;});
+  updCounts();
+}
+
+// ── File upload ────────────────────────────────────────
+var dz=document.getElementById('dz');
+dz.addEventListener('click',function(){document.getElementById('finput').click();});
+dz.addEventListener('dragover',function(ev){ev.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('drag');});
+dz.addEventListener('drop',function(ev){ev.preventDefault();dz.classList.remove('drag');handleFile(ev.dataTransfer.files[0]);});
+document.getElementById('finput').addEventListener('change',function(ev){handleFile(ev.target.files[0]);});
+
+function handleFile(f){
+  if(!f) return;
+  var mKey=document.getElementById('upMonthSel').value||currentMonth;
+  document.getElementById('pbw').style.display='block';
+  setPB(20,'Reading file...',f.name);
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var text=ev.target.result;
+    setPB(50,'Parsing columns...','');
+    var lines=text.trim().split('\n');
+    uploadedCols=lines[0].split(',').map(function(c){return c.trim().replace(/"/g,'');});
+    uploadedRows=lines.slice(1).map(function(l){return l.split(',').map(function(c){return c.trim().replace(/"/g,'');});});
+    setPB(70,'Saving to OneDrive...','OneDrive/Etisalat documents/'+mKey);
+    api('POST','/documents/upload',{fileName:f.name,content:text,month:mKey})
+      .then(function(d){setPB(85,d.ok?'Saved to OneDrive!':'OneDrive skipped: '+d.error,'');if(d.ok)toast('Saved to OneDrive/Etisalat documents/'+mKey);})
+      .catch(function(e){setPB(85,'OneDrive error: '+e.message,'');})
+      .finally(function(){
+        setPB(100,'Ready to map columns',uploadedRows.length+' rows loaded');
+        document.getElementById('upc').style.display='block';
+        document.getElementById('uprc').textContent=uploadedRows.length+' rows';
+        document.getElementById('upth').innerHTML='<tr>'+uploadedCols.map(function(c){return '<th>'+esc(c)+'</th>';}).join('')+'</tr>';
+        document.getElementById('uptb').innerHTML=uploadedRows.slice(0,8).map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';}).join('');
+        ['macct','mbill','mname'].forEach(function(id){document.getElementById(id).innerHTML='<option value="">-- none --</option>'+uploadedCols.map(function(c,i){return '<option value="'+i+'">'+esc(c)+'</option>';}).join('');});
+        document.getElementById('mpanel').style.display='block';
+        autoDet();
+        toast(f.name+' loaded ('+uploadedRows.length+' rows)');
+      });
+  };
+  reader.readAsText(f);
+}
+function setPB(p,l,s){document.getElementById('pbf').style.width=p+'%';document.getElementById('pbp').textContent=p+'%';document.getElementById('pbl').textContent=l;document.getElementById('pbst').textContent=s;}
+function autoDet(){
+  var cols=uploadedCols.map(function(c){return c.toLowerCase();});
+  var ai=cols.findIndex(function(c){return c.includes('account')||c.includes('acct');});
+  var bi=cols.findIndex(function(c){return c.includes('bill')||c.includes('amount')||c.includes('charge')||c.includes('total');});
+  var ni=cols.findIndex(function(c){return c.includes('name')||c.includes('posting');});
+  if(ai>=0) document.getElementById('macct').value=ai;
+  if(bi>=0) document.getElementById('mbill').value=bi;
+  if(ni>=0) document.getElementById('mname').value=ni;
+}
+document.getElementById('autoDetBtn').addEventListener('click',autoDet);
+document.getElementById('applyBtn').addEventListener('click',function(){
+  var ai=parseInt(document.getElementById('macct').value), bi=parseInt(document.getElementById('mbill').value);
+  var mKey=document.getElementById('upMonthSel').value||currentMonth;
+  if(isNaN(ai)||isNaN(bi)){toast('Select account and bill columns');return;}
+  var matched=0, unmatched=0, billed=[];
+  uploadedRows.forEach(function(r){
+    var acct=(r[ai]||'').trim(), bill=parseFloat((r[bi]||'').replace(/[^0-9.]/g,''));
+    if(!acct||isNaN(bill)) return;
+    var e=entries.find(function(x){return x.account===acct;});
+    if(e){e.bill=bill;billed.push({account:acct,bill:bill});matched++;}else{unmatched++;}
+  });
+  if(mKey) monthData[mKey]=billed;
+  document.getElementById('monthSel').value=mKey; currentMonth=mKey; updateMonthBadge();
+  document.getElementById('matchr').style.display='block';
+  document.getElementById('matchr').innerHTML='<span class="chip cg">&#10003; '+matched+' matched</span> <span class="chip ca">&#9888; '+unmatched+' unmatched</span> <span class="chip" style="background:var(--bl);color:var(--b)">&#128197; '+mKey+'</span>';
+  document.getElementById('hint1').style.display='none';
+  rB(); updCounts(); toast(matched+' entries updated for '+mKey);
+  sw('billing');
+});
+
+// ── Preview & send ─────────────────────────────────────
+function opPrev(){
+  var sl=entries.filter(function(e){return sel.has(e.id)&&e.limit>0;});
+  if(!sl.length){toast('Select entries with a billing limit');return;}
+  var chips=sl.slice(0,12).map(function(e){return '<div class="rchip">'+esc(e.name)+' ('+esc(e.id)+')</div>';});
+  if(sl.length>12) chips.push('<div class="rchip">+'+(sl.length-12)+' more</div>');
+  document.getElementById('prevChips').innerHTML=chips.join('');
+  document.getElementById('prevName').textContent=sl[0].name;
+  document.getElementById('prevBody').textContent=buildBody(sl[0]);
+  om('mPrev');
+}
+function openConf(){
+  document.getElementById('confCnt').textContent=sel.size;
+  document.getElementById('confMonth').textContent=currentMonth?mLabel(currentMonth):'No month';
+  var first=entries.find(function(e){return sel.has(e.id);});
+  if(first) document.getElementById('cSubj').value=buildSubject(first);
+  om('mConf');
+}
+function execSend(){
+  var sl=entries.filter(function(e){return sel.has(e.id);});
+  if(!sl.length) return;
+  document.getElementById('mConf').classList.remove('on');
+  var btn=document.getElementById('sendBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Sending...';
+  if(logEmpty){document.getElementById('logb').innerHTML='';logEmpty=false;}
+  var subjOvr=document.getElementById('cSubj').value.trim(), cc=document.getElementById('cCC').value.trim();
+  sl.forEach(function(e){addLog(e,'i');});
+  api('POST','/email/batch',{emails:sl.map(function(e){return{empId:e.id,to:e.email||SENDER,subject:subjOvr||buildSubject(e),body:buildBody(e),cc:cc||undefined};})})
+    .then(function(d){
+      (d.results||[]).forEach(function(r){if(r.ok){updLog(r.empId,'s');sentCnt++;}else{updLog(r.empId,'f',r.error);}});
+      document.getElementById('s-sent').textContent=sentCnt;
+      toast((d.sent||0)+' email(s) sent'+(d.failed?' ('+d.failed+' failed)':''));
+    }).catch(function(e){sl.forEach(function(x){updLog(x.id,'f',e.message);});toast('Send error: '+e.message);})
+    .finally(function(){btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send via Outlook';sel.clear();rB();});
+}
+function addLog(e,st){
+  var lb=document.getElementById('logb'), now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var d=document.createElement('div'); d.className='li'; d.id='li-'+e.id;
+  d.innerHTML='<div class="ld ld'+st+'" id="ld-'+CSS.escape(e.id)+'"></div><div><div class="lm" id="lm-'+CSS.escape(e.id)+'">'+( st==='i'?'Sending...':'Sent')+': '+esc(e.name)+'</div><div class="lmt">'+esc(e.id)+' &middot; '+esc(e.account)+(currentMonth?' &middot; '+currentMonth:'')+'</div></div><div class="ltm">'+now+'</div>';
+  lb.prepend(d);
+}
+function updLog(id,st,err){
+  var dot=document.getElementById('ld-'+CSS.escape(id)), main=document.getElementById('lm-'+CSS.escape(id));
+  var e=entries.find(function(x){return x.id===id;}); if(!dot||!e) return;
+  dot.className='ld ld'+st;
+  main.textContent=st==='s'?'\u2713 Sent: '+e.name+' <'+(e.email||SENDER)+'>':'\u2717 Failed: '+e.name+(err?' \u2014 '+err:'');
+}
+
+// ── Documents ──────────────────────────────────────────
+function refreshDocs(){
+  document.getElementById('docLoad').style.display='block';
+  document.getElementById('docGrid').innerHTML='';
+  api('GET','/documents/list').then(function(d){
+    document.getElementById('docLoad').style.display='none';
+    if(!d.ok) throw new Error(d.error);
+    docLib=d.docs||[];
+    document.getElementById('dbadge').textContent=docLib.length;
+    renderDocs(); toast(docLib.length+' document(s) loaded');
+  }).catch(function(e){document.getElementById('docLoad').style.display='none';toast('Error: '+e.message);});
+}
+function renderDocs(){
+  var f=document.getElementById('docFilter').value;
+  var docs=f?docLib.filter(function(d){return d.month===f;}):docLib;
+  var months=[...new Set(docLib.map(function(d){return d.month;}))].sort().reverse();
+  var fsel=document.getElementById('docFilter'), cur=fsel.value;
+  fsel.innerHTML='<option value="">All months</option>'+months.map(function(m){var d=new Date(m+'-01');return '<option value="'+m+'">'+d.toLocaleString('default',{month:'long',year:'numeric'})+'</option>';}).join('');
+  fsel.value=cur;
+  var grid=document.getElementById('docGrid');
+  if(!docs.length){grid.innerHTML='<div style="font-size:12px;color:var(--t2);padding:18px;text-align:center;grid-column:1/-1">No documents found.</div>';return;}
+  grid.innerHTML='';
+  docs.forEach(function(doc){
+    var ext=doc.name.split('.').pop().toLowerCase();
+    var d=doc.month?new Date(doc.month+'-01'):null;
+    var ml=d?d.toLocaleString('default',{month:'long',year:'numeric'}):'Unknown';
+    var card=document.createElement('div'); card.className='dcard';
+    card.innerHTML='<div class="dicon '+(ext==='csv'?'di-csv':ext==='xlsx'||ext==='xls'?'di-xl':'di-o')+'">'+(ext==='csv'?'&#x1F4CA;':ext==='xlsx'||ext==='xls'?'&#x1F4D7;':'&#x1F4C4;')+'</div>'+
+      '<div class="dname" title="'+esc(doc.name)+'">'+esc(doc.name)+'</div>'+
+      '<div class="dmeta">'+(doc.uploaded?new Date(doc.uploaded).toLocaleDateString():'')+' &middot; '+Math.round((doc.size||0)/1024)+' KB</div>'+
+      '<div class="dtag">'+ml+'</div>';
+    card.addEventListener('click',function(){
+      document.querySelectorAll('.dcard').forEach(function(c){c.classList.remove('picked');});
+      card.classList.add('picked'); selDoc=doc;
+      document.getElementById('ldName').textContent=doc.name;
+      document.getElementById('ldMonth').textContent=ml;
+      document.getElementById('ldPanel').style.display='block';
+    });
+    grid.appendChild(card);
+  });
+}
+document.getElementById('ldBtn').addEventListener('click',function(){
+  if(!selDoc) return;
+  api('GET','/documents/download?itemId='+encodeURIComponent(selDoc.itemId))
+    .then(function(data){
+      if(typeof data==='object') throw new Error('Unexpected response');
+      var lines=String(data).trim().split('\n');
+      uploadedCols=lines[0].split(',').map(function(c){return c.trim().replace(/"/g,'');});
+      uploadedRows=lines.slice(1).map(function(l){return l.split(',').map(function(c){return c.trim().replace(/"/g,'');});});
+      document.getElementById('upMonthSel').value=selDoc.month;
+      sw('upload');
+      document.getElementById('upc').style.display='block';
+      document.getElementById('uprc').textContent=uploadedRows.length+' rows';
+      document.getElementById('upth').innerHTML='<tr>'+uploadedCols.map(function(c){return '<th>'+esc(c)+'</th>';}).join('')+'</tr>';
+      document.getElementById('uptb').innerHTML=uploadedRows.slice(0,8).map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';}).join('');
+      ['macct','mbill','mname'].forEach(function(id){document.getElementById(id).innerHTML='<option value="">-- none --</option>'+uploadedCols.map(function(c,i){return '<option value="'+i+'">'+esc(c)+'</option>';}).join('');});
+      document.getElementById('mpanel').style.display='block'; autoDet();
+      document.getElementById('ldPanel').style.display='none';
+      toast('Loaded: '+selDoc.name);
+    }).catch(function(e){toast('Download error: '+e.message);});
+});
+document.getElementById('ldCancel').addEventListener('click',function(){document.getElementById('ldPanel').style.display='none';document.querySelectorAll('.dcard').forEach(function(c){c.classList.remove('picked');});});
+
+// ── Template editor ────────────────────────────────────
+var activeTmpl=0;
+function buildTemplateUI(){
+  var tg=document.getElementById('tmplTabs');
+  TEMPLATES.forEach(function(t,i){
+    var b=document.createElement('button'); b.className='ttab'+(i===0?' on':''); b.textContent=t.name;
+    b.addEventListener('click',function(){activeTmpl=i;loadTmpl(i);document.querySelectorAll('.ttab').forEach(function(x,j){x.classList.toggle('on',j===i);});});
+    tg.appendChild(b);
+  });
+  var vc=document.getElementById('varChips');
+  VARS.forEach(function(v){
+    var c=document.createElement('div'); c.className='vchip'; c.textContent=v.k; c.title=v.l;
+    c.addEventListener('click',function(){
+      var ta=document.getElementById('tmplBody'), pos=ta.selectionStart, val=ta.value;
+      ta.value=val.slice(0,pos)+v.k+val.slice(pos); ta.selectionStart=ta.selectionEnd=pos+v.k.length; ta.focus(); updatePreview();
+    });
+    vc.appendChild(c);
+  });
+  var pe=document.getElementById('prevEmp');
+  SAMPLE_EMPS.forEach(function(e,i){var o=document.createElement('option');o.value=i;o.textContent=e.name.split(' ')[0]+' '+e.name.split(' ').slice(-1)[0]+' (AED '+e.bill+')';pe.appendChild(o);});
+  loadTmpl(0);
+}
+function loadTmpl(i){
+  var t=TEMPLATES[i];
+  document.getElementById('tmplSubj').value=t.subject;
+  document.getElementById('tmplBody').value=t.body;
+  document.getElementById('tmplSig').value=t.sig;
+  updatePreview();
+}
+function updatePreview(){
+  var emp=SAMPLE_EMPS[parseInt(document.getElementById('prevEmp').value)||0];
+  var subj=document.getElementById('tmplSubj').value;
+  var body=document.getElementById('tmplBody').value;
+  var sig=document.getElementById('tmplSig').value;
+  var full=body+(sig?'\n\n'+sig:'');
+  var ml=new Date().toLocaleString('default',{month:'long',year:'numeric'});
+  var fake=Object.assign({},emp,{bill:emp.bill});
+  var rs=resolveVars(subj,fake,ml), rf=resolveVars(full,fake,ml);
+  document.getElementById('epTo').textContent=emp.name+' <'+emp.email+'>';
+  document.getElementById('epSubj').textContent=rs||'(no subject)';
+  document.getElementById('epBody').innerHTML=rf.replace(/\n/g,'<br>').replace(/\{\{[^}]+\}\}/g,function(m){return '<span class="ep-hl">'+m+'</span>';});
+  document.getElementById('subjLen').textContent=subj.length;
+  document.getElementById('bodyLen').textContent=full.length;
+  var secs=Math.round(full.split(/\s+/).length/3);
+  document.getElementById('readTime').textContent=secs<60?secs+'s':Math.ceil(secs/60)+'m';
+}
+function saveTemplate(){
+  TMPL.subject=document.getElementById('tmplSubj').value;
+  TMPL.body=document.getElementById('tmplBody').value;
+  TMPL.sig=document.getElementById('tmplSig').value;
+  var s=document.getElementById('tmplSaved'); s.style.display='inline'; setTimeout(function(){s.style.display='none';},2500);
+  toast('Template saved — will be used for all future emails');
+}
+document.getElementById('tmplPrevBtn').addEventListener('click',function(){
+  var box=document.getElementById('tmplPrevBox'), btn=document.getElementById('tmplPrevBtn');
+  if(box.style.display==='none'||!box.style.display){
+    box.textContent='Subject: '+TMPL.subject+'\n\n'+TMPL.body+(TMPL.sig?'\n\n'+TMPL.sig:'');
+    box.style.display='block'; btn.textContent='Hide';
+  } else { box.style.display='none'; btn.textContent='Preview'; }
+});
+
+// ── Add / Edit ─────────────────────────────────────────
+document.getElementById('doAddBtn').addEventListener('click',function(){
+  var id=document.getElementById('aId').value.trim(), acct=document.getElementById('aAcct').value.trim();
+  var name=document.getElementById('aName').value.trim(), desig=document.getElementById('aDesig').value.trim();
+  var err=document.getElementById('aErr');
+  if(!id||!acct||!name||!desig){err.textContent='Fill in required fields.';err.style.display='block';return;}
+  if(entries.find(function(e){return e.id===id;})){err.textContent='Employee ID already exists.';err.style.display='block';return;}
+  var plan=document.getElementById('aPlan').value, cl=parseInt(document.getElementById('aLim').value)||null;
+  entries.push({id:id,name:name,account:acct,desig:desig,location:document.getElementById('aLoc').value.trim()||'',locCode:'',plan:plan,limit:cl||(PLAN_LIMITS[plan]||0),email:document.getElementById('aEmail').value.trim(),bill:null});
+  err.style.display='none';
+  ['aId','aAcct','aName','aDesig','aEmail','aLoc','aLim'].forEach(function(x){document.getElementById(x).value='';});
+  document.getElementById('mAdd').classList.remove('on');
+  rB(); rR(); updCounts(); saveMaster();
+  toast(name+' added and master saved to OneDrive');
+});
+function opEdit(id){
+  var e=entries.find(function(x){return x.id===id;}); if(!e) return;
+  document.getElementById('eId').value=id; document.getElementById('eName').value=e.name;
+  document.getElementById('eDesig').value=e.desig; document.getElementById('eEmail').value=e.email||'';
+  document.getElementById('ePlan').value=e.plan; document.getElementById('eLim').value=e.limit;
+  om('mEdit');
+}
+document.getElementById('doEditBtn').addEventListener('click',function(){
+  var id=document.getElementById('eId').value, e=entries.find(function(x){return x.id===id;}); if(!e) return;
+  e.name=document.getElementById('eName').value.trim(); e.desig=document.getElementById('eDesig').value.trim();
+  e.email=document.getElementById('eEmail').value.trim(); e.plan=document.getElementById('ePlan').value;
+  var lv=parseInt(document.getElementById('eLim').value); e.limit=isNaN(lv)?(PLAN_LIMITS[e.plan]||0):lv;
+  document.getElementById('mEdit').classList.remove('on'); rB(); rR(); saveMaster();
+  toast('Entry updated and master saved to OneDrive');
+});
+
+// ── Event wiring ───────────────────────────────────────
+function sw(p){
+  document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
+  document.getElementById('pane-'+p).classList.add('on');
+  document.querySelector('[data-pane="'+p+'"]').classList.add('on');
+  if(p==='billing') rB(); if(p==='registry') rR(); if(p==='documents') renderDocs();
+}
+document.querySelectorAll('.tab').forEach(function(tab){tab.addEventListener('click',function(){sw(tab.dataset.pane);});});
+document.querySelectorAll('[data-bf]').forEach(function(p){p.addEventListener('click',function(){bFilter=p.dataset.bf;document.querySelectorAll('[data-bf]').forEach(function(x){x.classList.toggle('on',x.dataset.bf===bFilter);});rB();});});
+document.querySelectorAll('[data-rf]').forEach(function(p){p.addEventListener('click',function(){rFilter=p.dataset.rf;document.querySelectorAll('[data-rf]').forEach(function(x){x.classList.toggle('on',x.dataset.rf===rFilter);});rR();});});
+document.querySelectorAll('[data-close]').forEach(function(btn){btn.addEventListener('click',function(){document.getElementById(btn.dataset.close).classList.remove('on');});});
+document.querySelectorAll('.mbg').forEach(function(bg){bg.addEventListener('click',function(ev){if(ev.target===bg)bg.classList.remove('on');});});
+function om(id){document.getElementById(id).classList.add('on');}
+document.getElementById('btbody').addEventListener('change',function(ev){if(ev.target.classList.contains('rowchk'))togU(ev.target.dataset.id,ev.target.checked);});
+document.getElementById('btbody').addEventListener('click',function(ev){var b=ev.target.closest('.qsend');if(b){sel.clear();sel.add(b.dataset.id);rB();openConf();}});
+document.getElementById('rtbody').addEventListener('click',function(ev){var b=ev.target.closest('.editbtn');if(b)opEdit(b.dataset.id);});
+document.getElementById('chkall').addEventListener('change',function(){var chk=this.checked;getVis(bFilter,document.getElementById('bsrch').value,entries).forEach(function(e){if(chk)sel.add(e.id);else sel.delete(e.id);});rB();});
+document.getElementById('bsrch').addEventListener('input',rB);
+document.getElementById('rsrch').addEventListener('input',rR);
+document.getElementById('selOvBtn').addEventListener('click',function(){sel.clear();entries.filter(isOver).forEach(function(e){sel.add(e.id);});rB();toast(sel.size+' over-limit entries selected');});
+document.getElementById('goUpload').addEventListener('click',function(){sw('upload');});
+['addBtn','addBtn2'].forEach(function(id){var b=document.getElementById(id);if(b)b.addEventListener('click',function(){om('mAdd');});});
+['syncBtn','syncBtn2'].forEach(function(id){var b=document.getElementById(id);if(b)b.addEventListener('click',syncMaster);});
+document.getElementById('clrLog').addEventListener('click',function(){document.getElementById('logb').innerHTML='<div class="le">Log cleared.</div>';logEmpty=true;});
+document.getElementById('prevBtn').addEventListener('click',opPrev);
+document.getElementById('sendBtn').addEventListener('click',openConf);
+document.getElementById('prevConfBtn').addEventListener('click',function(){document.getElementById('mPrev').classList.remove('on');openConf();});
+document.getElementById('doSendBtn').addEventListener('click',execSend);
+document.getElementById('refreshDocsBtn').addEventListener('click',refreshDocs);
+document.getElementById('docFilter').addEventListener('change',renderDocs);
+document.getElementById('monthSel').addEventListener('change',updateMonthBadge);
+document.getElementById('tmplSubj').addEventListener('input',updatePreview);
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3500);}
+
+// ── Init ───────────────────────────────────────────────
+buildMonths(); buildTemplateUI(); rB(); rR(); updCounts(); checkHealth();
+</script>
+</body>
+</html>

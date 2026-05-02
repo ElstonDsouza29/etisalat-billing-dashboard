@@ -1,0 +1,11 @@
+{
+  "name": "etisalat-api",
+  "version": "1.0.0",
+  "description": "Etisalat Billing Dashboard — Azure Functions API",
+  "dependencies": {
+    "@azure/functions": "^4.3.0",
+    "@azure/msal-node": "^2.6.6",
+    "axios": "^1.6.8"
+  },
+  "engines": { "node": ">=18.0.0" }
+}
